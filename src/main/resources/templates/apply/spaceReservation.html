@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시설 대관 안내 | 부산도서관</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 기존의 예쁜 커스텀 스타일 유지 및 부트스트랩 보완 */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #fcfcfc;
+            padding: 20px;
+        }
+        .container-main {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+        h2 {
+            border-left: 5px solid #0d6efd;
+            padding-left: 15px;
+            color: #0a58ca;
+            margin-top: 40px;
+            font-size: 1.4rem;
+        }
+        /* 이용 절차 스텝 스타일 */
+        .step-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px 10px;
+            text-align: center;
+        }
+        .step-num {
+            font-weight: bold;
+            color: #0d6efd;
+            font-size: 1.3rem;
+        }
+        .required { color: #dc3545; margin-left: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="container-main shadow-sm">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <strong th:text="${message}">신청 완료 메시지</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="this.parentElement.style.display='none'"></button>
+    </div>
+    <h1 class="text-center mb-5">도서관 시설 대관 안내</h1>
+
+    <h2>■ 시설대관 이용절차</h2>
+    <div class="row align-items-center g-2 my-4 text-center">
+        <div class="col step-box"><span class="step-num">01</span><br>사용신청<br><small>(온라인)</small></div>
+        <div class="col-auto text-muted">▶</div>
+        <div class="col step-box"><span class="step-num">02</span><br>사용승인<br><small>(7일 이내)</small></div>
+        <div class="col-auto text-muted">▶</div>
+        <div class="col step-box"><span class="step-num">03</span><br>사용료 납부<br><small>(기한 내)</small></div>
+        <div class="col-auto text-muted">▶</div>
+        <div class="col step-box"><span class="step-num">04</span><br>시설 사용<br><small>(행사 진행)</small></div>
+    </div>
+
+    <h2>■ 대관 시설 현황</h2>
+    <div class="table-responsive mt-3">
+        <table class="table text-center">
+            <thead class="table-light">
+            <tr>
+                <th>구분</th><th>위치</th><th>좌석수</th><th>비고</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr><td><strong>회의실</strong></td><td>1층</td><td>80석</td><td>-</td></tr>
+            <tr><td><strong>전시실</strong></td><td>1층</td><td>-</td><td>작품 전시 전용</td></tr>
+            <tr><td><strong>극장</strong></td><td>지하 1층</td><td>150석</td><td>그랜드 피아노</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 id="apply-section">■ 온라인 시설 대관 신청하기</h2>
+    <div class="p-4 border rounded-3 bg-light mt-3">
+        <p class="text-end text-danger small">* 표시는 필수 입력 항목입니다.</p>
+
+        <form th:action="@{/apply/register}" th:object="${applyDTO}" method="post" id="applyForm">
+
+            <div class="mb-4">
+                <h5 class="border-bottom pb-2 text-secondary">[1] 신청인 정보</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">신청자<span class="required">*</span></label>
+                        <input type="text" th:field="*{applicantName}" class="form-control" placeholder="성명을 입력하세요.">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">연락처<span class="required">*</span></label>
+                        <input type="tel" th:field="*{phone}" class="form-control" placeholder="010-0000-0000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="border-bottom pb-2 text-secondary">[2] 신청 내용</h5>
+                <div class="mb-3">
+                    <label class="form-label">행사명<span class="required">*</span></label>
+                    <input type="text" th:field="*{eventName}" class="form-control" placeholder="행사 제목을 입력하세요.">
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">사용 시설<span class="required">*</span></label>
+                        <select th:field="*{facilityType}" class="form-select">
+                            <option value="">-- 선택 --</option>
+                            <option value="회의실">회의실 (1층)</option>
+                            <option value="전시실">전시실 (1층)</option>
+                            <option value="극장">극장 (지하 1층)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">참석인원<span class="required">*</span></label>
+                        <input type="number" th:field="*{participants}" class="form-control" placeholder="명">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">희망 날짜<span class="required">*</span></label>
+                        <input type="date" th:field="*{applyDate}" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">시간대<span class="required">*</span></label>
+                        <select th:field="*{applyTime}" class="form-select">
+                            <option value="">-- 선택 --</option>
+                            <option value="오전">오전 (09:00~12:00)</option>
+                            <option value="오후">오후 (13:00~17:00)</option>
+                            <option value="야간">야간 (18:00~22:00)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">행사 상세 내용</label>
+                    <textarea th:field="*{eventContent}" class="form-control" rows="4" placeholder="상세 내용을 입력하세요."></textarea>
+                </div>
+            </div>
+
+            <div class="text-end mt-5">
+                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">신청서 제출하기</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="alert alert-secondary mt-4 text-center border-0 shadow-sm" role="alert">
+        💡 방문 신청 희망 시 <strong>관리팀 (051-123-4567)</strong>으로 문의해 주세요.
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    document.getElementById('applyForm').addEventListener('submit', function(e) {
+        // 1. 검사할 항목들을 순서대로 배열에 담습니다. (ID, 이름)
+        const checkList = [
+            { id: 'applicantName', name: '신청자 성명' },
+            { id: 'phone', name: '연락처' },
+            { id: 'eventName', name: '행사명' },
+            { id: 'facilityType', name: '사용 시설' },
+            { id: 'participants', name: '참석 인원' },
+            { id: 'applyDate', name: '희망 날짜' },
+            { id: 'applyTime', name: '시간대' }
+        ];
+
+        // 2. 루프를 돌며 위에서부터 빈칸이 있는지 확인합니다.
+        for (let item of checkList) {
+            const element = document.getElementById(item.id);
+            if (!element.value.trim()) {
+                // 전송 중단
+                e.preventDefault();
+
+                // 안내 문구 출력
+                alert(item.name + ' 항목을 입력(선택)해 주세요.');
+
+                // 해당 칸으로 포커스 이동 (사용자가 바로 입력할 수 있게)
+                element.focus();
+
+                // 첫 번째 빈칸만 찾고 함수 종료
+                return;
+            }
+        }
+
+        // 모든 검사를 통과했을 때 (선택 사항: 확인 창)
+        // if(!confirm('신청서를 제출하시겠습니까?')) { e.preventDefault(); }
+    });
+
+    // 성공 메시지 처리 (기존과 동일)
+    const message = [[${message}]];
+    if (message) {
+        alert(message);
+    }
+</script>
+
+</body>
+</html>
