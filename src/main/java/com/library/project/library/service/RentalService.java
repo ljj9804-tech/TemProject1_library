@@ -38,7 +38,7 @@ public class RentalService {
                 .orElseThrow(() -> new RuntimeException("책 없음"));
 
         // 이미 대출중인지 확인
-        rentalRepository.findByBook_BookIdAndStatus(dto.getBookId(), RentalStatus.RENTED)
+        rentalRepository.findByBook_IdAndStatus(dto.getBookId(), RentalStatus.RENTED)
                 .ifPresent(r -> {
                     throw new RuntimeException("이미 대출된 책입니다.");
                 });

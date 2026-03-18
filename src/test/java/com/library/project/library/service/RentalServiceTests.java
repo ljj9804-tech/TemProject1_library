@@ -1,15 +1,11 @@
 package com.library.project.library.service;
 
 import com.library.project.library.dto.rentalDto.RentalRequestDTO;
-import com.library.project.library.dto.rentalDto.RentalResponseDTO;
 import com.library.project.library.dto.rentalDto.ReturnRequestDTO;
-import com.library.project.library.entity.Book;
 import com.library.project.library.entity.Rental;
 import com.library.project.library.entity.User;
 import com.library.project.library.enums.BookStatus;
 import com.library.project.library.enums.RentalStatus;
-import com.library.project.library.repository.BookRepository;
-import com.library.project.library.repository.RentalRepository;
 import com.library.project.library.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;

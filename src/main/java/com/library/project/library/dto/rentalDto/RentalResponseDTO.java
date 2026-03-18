@@ -22,7 +22,7 @@ public class RentalResponseDTO {
         return RentalResponseDTO.builder()
                 .rentId(rental.getId())
                 .userId(rental.getUser().getUserId())
-                .bookId(rental.getBook().getBookId())
+                .bookId(rental.getBook().getId())
                 .rentalDate(rental.getRentalDate())
                 .dueDate(rental.getDueDate())
                 .returnDate(rental.getReturnDate())
