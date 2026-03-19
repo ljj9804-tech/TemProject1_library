@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko" class="h-100"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
->
+      xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, 그리고 Bootstrap 기여자들">
@@ -39,7 +38,69 @@
     <link href="sticky-footer-navbar.css" rel="stylesheet">
 </head>
 <body class="d-flex flex-column h-100">
+
 <header>
+    <a href="/" id="header-logo">
+        <img src="/images/페페1.jpg" alt="로고" style="width:40px; height:40px; border-radius:8px; cursor:pointer;">
+    </a>
+    <button class="hamburger" id="hamburgerBtn">&#9776;</button>
+    <ul class="header-nav">
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="0">Active</span>
+        </li>
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="1">Active</span>
+        </li>
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="2">Active</span>
+        </li>
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="3">Active</span>
+        </li>
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="4">Active</span>
+        </li>
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="5">Active</span>
+        </li>
+        <div class="header-nav-content d-flex">
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="0">
+                <li><a href="/book/booklist">책 검색</a></li>
+                <li><a href="/book/booklist">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="1">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="2">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+                <li><a href="#">항목 5</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="3">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="4">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="5">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+                <li><a href="#">항목 5</a></li>
+                <li><a href="#">항목 6</a></li>
+            </ul>
+        </div>
+    </ul>
     <!-- Fixed navbar -->
 <!--    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">-->
 <!--        <div class="container-fluid">-->
@@ -68,10 +129,76 @@
 <!--    </nav>-->
 </header>
 
-<!--flex-shrink-0 : 찌그러짐 방지 -->
-<main class="flex-shrink-0 pt-5 mt-3">
-    <div class="container" layout:fragment="content">
-        <p>페이지 콘텐츠 부분이고, 동적으로 교체될 예정</p>
+<!-- 사이드바 오버레이 -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- 사이드바 -->
+<nav class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose">&times;</button>
+    <ul class="sidebar-menu list-unstyled">
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+                <li><a href="#">항목 5</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">Active</span>
+            <ul class="sidebar-sub list-unstyled">
+                <li><a href="#">항목 1</a></li>
+                <li><a href="#">항목 2</a></li>
+                <li><a href="#">항목 3</a></li>
+                <li><a href="#">항목 4</a></li>
+                <li><a href="#">항목 5</a></li>
+                <li><a href="#">항목 6</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<div id="page-title" class="d-none d-flex align-items-center justify-content-center fw-bold fs-4">
+</div>
+
+<!-- 페이지별 컨텐츠 -->
+<main class="flex-shrink-0 pt-4">
+    <div class="container-fluid" layout:fragment="content">
+        <p>페이지 콘텐츠가 여기에 들어옵니다.</p>
     </div>
 </main>
 
@@ -80,17 +207,111 @@
         <span class="text-muted">Place sticky footer content here.</span>
     </div>
 </footer>
-<!--    우리가 만든 css, js 를 불러오는 코드가 필요함, 타임리프 태그를 이용해서, 링크 설정. -->
+
 <script th:src="@{/js/script.js}"></script>
-<!--다른 html 파일에서, 부트스트랩의 js 로드를 늦게 해서, 인식을 못하는 문제가 발생해서, 순서 위치를 교체-->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 
+<script>
+    const spans = document.querySelectorAll('.spanTap');
+    const contents = document.querySelectorAll('.header-inner');
+
+    function activate(index) {
+        spans[index].classList.add('spanTap-active');
+        contents[index].classList.add('header-inner-active');
+    }
+
+    function deactivate(index) {
+        spans[index].classList.remove('spanTap-active');
+        contents[index].classList.remove('header-inner-active');
+    }
+
+    spans.forEach(span => {
+        const i = span.dataset.index;
+        span.addEventListener('mouseenter', () => activate(i));
+        span.addEventListener('mouseleave', () => deactivate(i));
+    });
+
+    contents.forEach(content => {
+        const i = content.dataset.index;
+        content.addEventListener('mouseenter', () => activate(i));
+        content.addEventListener('mouseleave', () => deactivate(i));
+    });
+
+    // 사이드바
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    document.getElementById('hamburgerBtn').addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+    });
+
+    document.getElementById('sidebarClose').addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            sidebar.style.transition = 'none';
+            overlay.style.transition = 'none';
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            setTimeout(() => {
+                sidebar.style.transition = '';
+                overlay.style.transition = '';
+            }, 0);
+        }
+    });
+
+    // 헤더 링크 클릭 시 텍스트를 localStorage에 저장
+    document.querySelectorAll('.header-inner a, .sidebar-sub a').forEach(a => {
+        a.addEventListener('click', function () {
+            localStorage.setItem('pageTitle', this.textContent);
+        });
+    });
+
+    document.querySelector('#header-logo').addEventListener('click', function () {
+        localStorage.setItem('pageTitle', "");
+    });
+
+    // 페이지 로드 시 저장된 타이틀 표시
+    const savedTitle = localStorage.getItem('pageTitle') || '';
+    const pageTitleEl = document.getElementById('page-title');
+    pageTitleEl.textContent = savedTitle;
+    if (savedTitle) {
+        pageTitleEl.classList.remove('d-none');
+    }
+
+    // 사이드바 아코디언
+    document.querySelectorAll('.sidebar-tap').forEach(tap => {
+        tap.addEventListener('click', () => {
+            const sub = tap.nextElementSibling;
+            const isOpen = sub.classList.contains('open');
+            const openSub = document.querySelector('.sidebar-sub.open');
+
+            if (openSub && openSub !== sub) {
+                openSub.classList.remove('open');
+                setTimeout(() => {
+                    if (!isOpen) sub.classList.add('open');
+                }, 300);
+            } else {
+                if (!isOpen) sub.classList.add('open');
+            }
+        });
+    });
+</script>
+
+<!-- 페이지별 스크립트 -->
 <th:block layout:fragment="script">
-
 </th:block>
-
 
 </body>
 </html>

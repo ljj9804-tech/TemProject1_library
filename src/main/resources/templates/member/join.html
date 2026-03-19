@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<body>
+<div layout:fragment="content">
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    회원 가입 (Join)
+                </div>
+                <div class="card-body">
+                    <form action="/member/join" method="post">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">아이디</span>
+                            <input type="text" name="mid" id="mid" class="form-control" placeholder="4자 이상" required>
+                            <button type="button" class="btn btn-outline-secondary" id="checkIdBtn">중복확인</button>
+                        </div>
+                        <div id="idCheckMsg" class="mb-3" style="font-size: 0.9em;"></div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">비밀번호</span>
+                            <input type="password" name="mpw" class="form-control" placeholder="비밀번호" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이름</span>
+                            <input type="text" name="mname" class="form-control" placeholder="성함" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이메일</span>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="example@lib.com" required>
+                            <button type="button" class="btn btn-outline-secondary" id="checkEmailBtn">중복확인</button>
+                        </div>
+                        <div id="emailCheckMsg" class="mb-3" style="font-size: 0.9em;"></div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">지역</span>
+                            <!--<select name="region" class="form-select">
+                                <option value="BUSAN">부산</option>
+                                <option value="SEOUL">서울</option>
+                                <option value="GYEONGGI">경기</option>
+                            </select>-->
+                            <select name="region" class="form-select" required>
+                                <option value="" th:selected="${dto == null || dto.region == null}">선택</option>
+                                <option value="SEOUL" th:selected="${dto?.region == 'SEOUL'}">서울</option>
+                                <option value="BUSAN" th:selected="${dto?.region == 'BUSAN'}">부산</option>
+                                <option value="DAEGU" th:selected="${dto?.region == 'DAEGU'}">대구</option>
+                                <option value="INCHEON" th:selected="${dto?.region == 'INCHEON'}">인천</option>
+                                <option value="GWANGJU" th:selected="${dto?.region == 'GWANGJU'}">광주</option>
+                                <option value="DAEJEON" th:selected="${dto?.region == 'DAEJEON'}">대전</option>
+                                <option value="ULSAN" th:selected="${dto?.region == 'ULSAN'}">울산</option>
+                                <option value="SEJONG" th:selected="${dto?.region == 'SEJONG'}">세종</option>
+                                <option value="GYEONGGI" th:selected="${dto?.region == 'GYEONGGI'}">경기</option>
+                                <option value="GANGWON" th:selected="${dto?.region == 'GANGWON'}">강원</option>
+                                <option value="CHUNGBUK" th:selected="${dto?.region == 'CHUNGBUK'}">충북</option>
+                                <option value="CHUNGNAM" th:selected="${dto?.region == 'CHUNGNAM'}">충남</option>
+                                <option value="JEONBUK" th:selected="${dto?.region == 'JEONBUK'}">전북</option>
+                                <option value="JEONNAM" th:selected="${dto?.region == 'JEONNAM'}">전남</option>
+                                <option value="GYEONGBUK" th:selected="${dto?.region == 'GYEONGBUK'}">경북</option>
+                                <option value="GYEONGNAM" th:selected="${dto?.region == 'GYEONGNAM'}">경남</option>
+                                <option value="JEJU" th:selected="${dto?.region == 'JEJU'}">제주</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="role" value="USER">
+
+                        <div class="my-4">
+                            <div class="float-end">
+                                <button type="submit" class="btn btn-primary">회원가입</button>
+                                <button type="reset" class="btn btn-secondary">다시쓰기</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script" th:inline="javascript">
+    /// 1. 상태 변수 (중복 확인 통과 여부 저장)
+    let isIdChecked = false;
+    let isEmailChecked = false;
+
+    // 2. 아이디 중복 확인 버튼 이벤트
+    document.querySelector("#checkIdBtn").addEventListener("click", function() {
+        const mid = document.querySelector("#mid").value;
+        const msgArea = document.querySelector("#idCheckMsg");
+
+        if(mid.length < 4) {
+            alert("아이디는 4자 이상 입력해야 합니다.");
+            return;
+        }
+
+        // [중요] Fetch API를 이용해 컨트롤러(@GetMapping) 호출
+        fetch(`/member/checkId?mid=${mid}`)
+            .then(response => response.text())
+            .then(data => {
+                console.log("서버가 보낸 값: " + data);
+                if(data === "exist") {
+                    msgArea.innerText = "이미 사용 중인 아이디입니다.";
+                    msgArea.style.color = "red";
+                    isIdChecked = false;
+                } else {
+                    msgArea.innerText = "사용 가능한 아이디입니다.";
+                    msgArea.style.color = "green";
+                    isIdChecked = true;
+                }
+            });
+    });
+
+    // 3. 이메일 중복 확인 이벤트
+    document.querySelector("#checkEmailBtn").addEventListener("click", function() {
+        const email = document.querySelector("#email").value;
+        const msgArea = document.querySelector("#emailCheckMsg"); // 메시지 뿌릴 곳
+
+        // 이메일 형식 간단 체크
+        if(!email.includes('@')) {
+            alert("올바른 이메일 형식이 아닙니다.");
+            return;
+        }
+
+        // 서버로 신호 보내기
+        fetch(`/member/checkEmail?email=${email}`)
+            .then(res => res.text())
+            .then(data => {
+                console.log("서버 응답:", data);
+                if(data === "exist") {
+                    alert("이미 사용 중인 이메일입니다.");
+                    isEmailChecked = false;
+                } else {
+                    alert("사용 가능한 이메일입니다.");
+                    isEmailChecked = true;
+                }
+            })
+            .catch(err => console.error("에러 발생:", err));
+    });
+
+    // 4. [최종 방어] 폼 제출 시 체크
+    document.querySelector("#joinForm").addEventListener("submit", function(e) {
+        if(!isIdChecked) {
+            e.preventDefault(); // 가입 중단!
+            alert("아이디 중복 확인을 먼저 해주세요.");
+        } else if(!isEmailChecked) {
+            e.preventDefault(); // 가입 중단!
+            alert("이메일 중복 확인을 먼저 해주세요.");
+        }
+    });
+</script>
+
+</body>
+</html>

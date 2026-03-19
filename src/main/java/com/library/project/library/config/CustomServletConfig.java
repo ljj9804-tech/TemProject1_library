@@ -2,6 +2,7 @@ package com.library.project.library.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,4 +29,22 @@ public class CustomServletConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/");
     }
+
+    // 인터셉터 설정
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LoginCheckInterceptor()) // 인터셉터 클래스 이름 확인!
+                .addPathPatterns("/member/mypage", "/member/modify") // 로그인이 필요한 주소들 "/todo/**"
+                .excludePathPatterns(
+                        "/member/login",
+                        "/member/join",
+                        "/member/checkId",    // 우리가 만든 아이디 중복 체크 허용
+                        "/member/checkEmail", // 이메일 중복 체크 허용
+                        "/js/**",
+                        "/css/**",
+                        "/favicon.ico"
+                );
+    }
+
+
 }
