@@ -4,13 +4,13 @@ import com.library.project.library.dto.rentalDto.RentalRequestDTO;
 import com.library.project.library.dto.rentalDto.RentalResponseDTO;
 import com.library.project.library.dto.rentalDto.ReturnRequestDTO;
 import com.library.project.library.entity.Book;
+import com.library.project.library.entity.Member;
 import com.library.project.library.entity.Rental;
-import com.library.project.library.entity.User;
 import com.library.project.library.enums.BookStatus;
 import com.library.project.library.enums.RentalStatus;
 import com.library.project.library.repository.BookRepository;
 import com.library.project.library.repository.RentalRepository;
-import com.library.project.library.repository.UserRepository;
+import com.library.project.library.repository.MemberRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @SpringBootTest
 @Log4j2
 @Transactional
-public class RentalServiceTests {
+class RentalServiceTests {
 
     @Autowired
     private RentalService rentalService;
 
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private BookRepository bookRepository;
@@ -38,15 +39,16 @@ public class RentalServiceTests {
     private RentalRepository rentalRepository;
 
     /**
-     * 📌 도서 대출 테스트
+     * ✅ 1. 대출 성공 + 상태 검증
      */
     @Test
-    public void testRentBook() {
+    void testRentBook_success() {
 
-        // given
-        User user = userRepository.save(
-                User.builder()
-                        .name("테스트유저")
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user1")
+                        .mpw("1234")
+                        .mname("테스트유저")
                         .build()
         );
 
@@ -58,129 +60,250 @@ public class RentalServiceTests {
         );
 
         RentalRequestDTO dto = RentalRequestDTO.builder()
-                .userId(user.getUserId())
+                .memberId(member.getId())
                 .bookId(book.getBookId())
                 .build();
 
-        // when
         rentalService.rentBook(dto);
 
-        // then
-        log.info("대출 완료 확인");
+        // ⭐ 검증
+        List<Rental> rentals = rentalRepository.findAll();
+
+        assert rentals.size() == 1;
+        assert rentals.get(0).getStatus() == RentalStatus.RENTED;
+
+        Book resultBook = bookRepository.findById(book.getBookId()).get();
+        assert resultBook.getStatus() == BookStatus.RENTED;
+
+        log.info("대출 성공 검증 완료");
     }
 
     /**
-     * 📌 도서 반납 테스트
+     * ❌ 2. 하루 3권 제한 테스트
      */
     @Test
-    public void testReturnBook() {
+    void testRentBook_overLimit() {
 
-        // given
-        User user = userRepository.save(
-                User.builder().name("유저1").build()
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user2")
+                        .mpw("1234")
+                        .mname("제한유저")
+                        .build()
         );
 
-        Book book = bookRepository.save(
+        // 책 3개
+        for(int i = 0; i < 3; i++){
+            Book book = bookRepository.save(
+                    Book.builder()
+                            .title("책" + i)
+                            .status(BookStatus.AVAILABLE)
+                            .build()
+            );
+
+            rentalRepository.save(
+                    Rental.builder()
+                            .member(member)
+                            .book(book)
+                            .status(RentalStatus.RENTED)
+                            .rentalDate(LocalDate.now())
+                            .build()
+            );
+        }
+
+        Book newBook = bookRepository.save(
                 Book.builder()
-                        .title("스프링 부트")
+                        .title("초과책")
                         .status(BookStatus.AVAILABLE)
                         .build()
         );
 
-        Rental rental = rentalRepository.save(
-                Rental.builder()
-                        .user(user)
-                        .book(book)
-                        .status(RentalStatus.RENTED)
-                        .rentalDate(LocalDate.now())
-                        .build()
-        );
+        RentalRequestDTO dto = RentalRequestDTO.builder()
+                .memberId(member.getId())
+                .bookId(newBook.getBookId())
+                .build();
 
-        ReturnRequestDTO dto = new ReturnRequestDTO(rental.getId());
+        try {
+            rentalService.rentBook(dto);
+            assert false; // 실패해야 정상
+        } catch (RuntimeException e){
+            assert e.getMessage().contains("하루 최대 3권");
+        }
 
-        // when
-        rentalService.returnBook(dto);
-
-        // then
-        Rental result = rentalRepository.findById(rental.getId()).get();
-        log.info("반납 상태 확인 : " + result.getStatus());
+        log.info("대출 제한 테스트 완료");
     }
 
     /**
-     * 📌 사용자 대출 목록 조회 테스트
+     * ❌ 3. 이미 대출된 책
      */
     @Test
-    public void testGetUserRentals() {
+    void testRentBook_alreadyRented() {
 
-        // given
-        User user = userRepository.save(
-                User.builder().name("조회유저").build()
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user3")
+                        .mpw("1234")
+                        .mname("중복유저")
+                        .build()
         );
 
         Book book = bookRepository.save(
                 Book.builder()
-                        .title("JPA 책")
-                        .status(BookStatus.AVAILABLE)
+                        .title("중복책")
+                        .status(BookStatus.RENTED)
                         .build()
         );
 
         rentalRepository.save(
                 Rental.builder()
-                        .user(user)
+                        .member(member)
                         .book(book)
                         .status(RentalStatus.RENTED)
                         .rentalDate(LocalDate.now())
                         .build()
         );
 
-        // when
-        List<RentalResponseDTO> list =
-                rentalService.getUserRentals(user.getUserId());
+        RentalRequestDTO dto = RentalRequestDTO.builder()
+                .memberId(member.getId())
+                .bookId(book.getBookId())
+                .build();
 
-        // then
-        log.info("대출 목록 개수 : " + list.size());
-        list.forEach(r -> log.info(r));
+        try {
+            rentalService.rentBook(dto);
+            assert false;
+        } catch (RuntimeException e){
+            assert e.getMessage().contains("이미 대출된");
+        }
     }
 
     /**
-     * 📌 인기 도서 통계 테스트
+     * ✅ 4. 반납 성공 + 상태 검증
      */
     @Test
-    public void testMostRentedBooks() {
+    void testReturnBook_success() {
 
-        // given
-        User user = userRepository.save(
-                User.builder().name("통계유저").build()
-        );
-
-        Book book1 = bookRepository.save(
-                Book.builder()
-                        .title("인기책1")
-                        .status(BookStatus.AVAILABLE)
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user4")
+                        .mpw("1234")
+                        .mname("반납유저")
                         .build()
         );
 
-        Book book2 = bookRepository.save(
+        Book book = bookRepository.save(
                 Book.builder()
-                        .title("인기책2")
-                        .status(BookStatus.AVAILABLE)
+                        .title("반납책")
+                        .status(BookStatus.RENTED)
                         .build()
         );
 
-        // book1 → 2번 대출
-        rentalRepository.save(Rental.builder().user(user).book(book1).status(RentalStatus.RENTED).build());
-        rentalRepository.save(Rental.builder().user(user).book(book1).status(RentalStatus.RETURNED).build());
+        Rental rental = rentalRepository.save(
+                Rental.builder()
+                        .member(member)
+                        .book(book)
+                        .status(RentalStatus.RENTED)
+                        .rentalDate(LocalDate.now())
+                        .build()
+        );
 
-        // book2 → 1번 대출
-        rentalRepository.save(Rental.builder().user(user).book(book2).status(RentalStatus.RENTED).build());
+        rentalService.returnBook(new ReturnRequestDTO(rental.getId()));
 
-        // when
-        List<Object[]> result = rentalService.getMostRentedBooks();
+        Rental result = rentalRepository.findById(rental.getId()).get();
 
-        // then
-        result.forEach(arr -> {
-            log.info("bookId : " + arr[0] + ", count : " + arr[1]);
-        });
+        assert result.getStatus() == RentalStatus.RETURNED;
+        assert result.getReturnDate() != null;
+
+        Book resultBook = bookRepository.findById(book.getBookId()).get();
+        assert resultBook.getStatus() == BookStatus.AVAILABLE;
+
+        log.info("반납 성공 검증 완료");
     }
 
+    /**
+     * ❌ 5. 이미 반납된 경우
+     */
+    @Test
+    void testReturnBook_alreadyReturned() {
+
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user5")
+                        .mpw("1234")
+                        .mname("예외유저")
+                        .build()
+        );
+
+        Rental rental = rentalRepository.save(
+                Rental.builder()
+                        .member(member)
+                        .status(RentalStatus.RETURNED)
+                        .build()
+        );
+
+        try {
+            rentalService.returnBook(new ReturnRequestDTO(rental.getId()));
+            assert false;
+        } catch (RuntimeException e){
+            assert e.getMessage().contains("이미 반납");
+        }
+    }
+
+    /**
+     * ❌ 6. 재대출 제한
+     */
+    @Test
+    void testRenew_overLimit() {
+
+        Rental rental = rentalRepository.save(
+                Rental.builder()
+                        .renewCount(1)
+                        .status(RentalStatus.RENTED)
+                        .build()
+        );
+
+        try {
+            rentalService.renewBook(rental.getId());
+            assert false;
+        } catch (RuntimeException e){
+            assert e.getMessage().contains("재대출");
+        }
+    }
+
+    /**
+     * ✅ 7. 조회 테스트
+     */
+    @Test
+    void testGetUserRentals() {
+
+        Member member = memberRepository.save(
+                Member.builder()
+                        .mid("user6")
+                        .mpw("1234")
+                        .mname("조회유저")
+                        .build()
+        );
+
+        Book book = bookRepository.save(
+                Book.builder()
+                        .title("조회책")
+                        .status(BookStatus.RENTED)
+                        .build()
+        );
+
+        rentalRepository.save(
+                Rental.builder()
+                        .member(member)
+                        .book(book)
+                        .status(RentalStatus.RENTED)
+                        .build()
+        );
+
+        List<RentalResponseDTO> list =
+                rentalService.getUserRentals(member.getId());
+
+        assert list.size() == 1;
+        assert list.get(0).getMemberId().equals(member.getId());
+
+        log.info("조회 테스트 완료");
+    }
 }

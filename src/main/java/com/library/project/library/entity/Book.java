@@ -35,5 +35,8 @@ public class Book {
     @Builder.Default
     private List<Rental> rentals = new ArrayList<>();
 
+    public void rent(){
+        this.status = BookStatus.RENTED;
+    }
 
 }

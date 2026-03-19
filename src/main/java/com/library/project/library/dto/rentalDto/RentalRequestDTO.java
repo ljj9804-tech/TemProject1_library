@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RentalRequestDTO {
 
-    private Long userId;
+    private Long memberId;
     private Long bookId;
 
 }
