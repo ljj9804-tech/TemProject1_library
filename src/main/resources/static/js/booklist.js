@@ -73,12 +73,53 @@ let currentSort = _initParams.get('sort') || 'id';
 // 각 리스트 항목(<a> 태그)에 책의 모든 정보를 data-* 속성으로 심어둠
 // 클릭 시 별도 API 호출 없이 이 data-* 값을 읽어서 상세 모달에 바로 표시함
 // =============================================
+const CHOSUNG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function getChosung(char) {
+    const code = char.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) return char;
+    return CHOSUNG[Math.floor(code / 588)];
+}
+
+function isChosung(str) {
+    return /^[ㄱ-ㅎ]+$/.test(str);
+}
+
+function highlightChosung(text, keyword) {
+    if (!text || !keyword) return text || '';
+    const textChosung = [...text].map(getChosung).join('');
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+        if (textChosung.slice(i).startsWith(keyword)) {
+            result += `<mark>${text.slice(i, i + keyword.length)}</mark>`;
+            i += keyword.length;
+        } else {
+            result += text[i];
+            i++;
+        }
+    }
+    return result;
+}
+
+function highlight(text, keyword) {
+    if (!keyword || !text) return text || '';
+    if (isChosung(keyword)) return highlightChosung(text, keyword);
+    const regex = new RegExp(`(${keyword})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+}
+
 function renderList(list) {
     const container = document.querySelector('.list-group');
 
     // 목록이 비어있으면 안내 문구 표시 후 종료
     if (!list || list.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted py-4">검색 결과가 없습니다.</div>';
+        container.innerHTML = `
+      <div class="text-center text-muted py-4">
+          <p>${currentKeyword ? `"${currentKeyword}"에 대한 검색 결과가 없습니다.` : '검색 결과가 없습니다.'}</p>
+          ${currentKeyword ? `<button class="btn btn-outline-secondary btn-sm" onclick="clearSearch()">전체 목록 보기</button>` : ''}
+      </div>`;
+
         return;
     }
 
@@ -104,9 +145,9 @@ function renderList(list) {
 
                 <!-- 가운데: 제목 / 저자 / 출판사 -->
                 <div class="flex-grow-1">
-                    <h5 class="mb-1">${dto.bookTitle}</h5>
-                    <p class="mb-1 text-muted">${dto.author || ''}</p>
-                    <small class="text-muted">${dto.publisher || ''}</small>
+                    <h5 class="mb-1">${highlight(dto.bookTitle, currentKeyword)}</h5>
+                    <p class="mb-1 text-muted">${highlight(dto.author, currentKeyword)}</p>
+                    <small class="text-muted">${highlight(dto.publisher, currentKeyword)}</small>
                 </div>
 
                 <!-- 오른쪽: 대여 상태 뱃지 / 추천 버튼 / 날짜 -->
@@ -156,6 +197,11 @@ function renderPagination(data) {
 
     // 데이터가 없으면 페이지네이션 비우고 종료
     if (!data || !data.dtoList) {
+        pagination.innerHTML = '';
+        return;
+    }
+
+    if (!data.prev && !data.next && data.start === data.end) {
         pagination.innerHTML = '';
         return;
     }
@@ -258,6 +304,8 @@ document.querySelectorAll('.sort-item').forEach(item => {
 //   클릭된 대상이 추천 버튼인지 리스트 항목인지를 내부에서 구분
 // =============================================
 document.querySelector('.list-group').addEventListener('click', async function (e) {
+    // 리스트 아이템이나 추천 버튼이 아니면 기본 동작 허용 (전체 목록 보기 링크 등)
+    if (!e.target.closest('.list-group-item') && !e.target.closest('.recommend-btn')) return;
     // a 태그 기본 동작(페이지 이동) 막기
     e.preventDefault();
 
@@ -280,7 +328,6 @@ document.querySelector('.list-group').addEventListener('click', async function (
         if (isActive) {
             // 이미 추천한 상태 → DELETE 요청으로 추천 취소
             await axios.delete(`/book/recommend/${bookId}`);
-
             // 버튼 스타일을 '미추천' 상태로 변경
             btn.classList.replace('btn-danger', 'btn-outline-danger');
             btn.textContent = '♡ 추천하기';
@@ -321,13 +368,19 @@ document.querySelector('.list-group').addEventListener('click', async function (
     // ── 상세 모달 데이터 채우기 ──────────────────────
     // API를 다시 호출하지 않고, 리스트 항목에 심어둔 data-* 속성값을 읽어서 바로 표시
     // dataset.title = data-title 속성값, dataset.image = data-image 속성값 ... 이런 방식
-    document.getElementById('detail-book-title').textContent = target.dataset.title;
+    const recommendBtn = target.querySelector('.recommend-btn');
+    const isRecommended = recommendBtn && recommendBtn.classList.contains('btn-danger');
+    const detailTitle = document.getElementById('detail-book-title');
+    detailTitle.innerHTML = highlight(target.dataset.title, currentKeyword) + (isRecommended ? ' ♥' : ' ♡');
+    detailTitle.style.cursor = 'pointer';
+    detailTitle.dataset.bookId = target.getAttribute('data-id');
     document.getElementById('detail-book-image').src = target.dataset.image;
-    document.getElementById('detail-author').textContent = target.dataset.author || '-';
-    document.getElementById('detail-publisher').textContent = target.dataset.publisher || '-';
+    document.getElementById('detail-author').innerHTML = highlight(target.dataset.author || '-', currentKeyword);
+    document.getElementById('detail-publisher').innerHTML = highlight(target.dataset.publisher || '-', currentKeyword);
     document.getElementById('detail-pubdate').textContent = target.dataset.pubdate || '-';
     document.getElementById('detail-isbn').textContent = target.dataset.isbn || '-';
-    document.getElementById('detail-description').textContent = target.dataset.description || '책 소개가 없습니다.';
+    document.getElementById('detail-description').innerHTML = highlight(target.dataset.description || '책 소개가 없습니다.', currentKeyword);
+
 
     // 대여 상태에 따라 뱃지 색상과 버튼 텍스트/스타일을 다르게 표시
     const statusEl = document.getElementById('detail-status');
@@ -361,6 +414,39 @@ document.getElementById('bookDetailModal').addEventListener('hide.bs.modal', fun
 
 
 // =============================================
+// 상세 모달 제목 클릭 → 추천 토글
+// =============================================
+document.getElementById('detail-book-title').addEventListener('click', async function () {
+    const bookId = this.dataset.bookId;
+    if (!bookId) return;
+
+    // 현재 추천 상태 확인 (제목 끝에 ♥가 있으면 추천된 상태)
+    const isRecommended = this.textContent.includes('♥');
+
+    // 리스트에서 해당 책의 추천 버튼 찾기
+    const listBtn = document.querySelector(`.recommend-btn[data-id="${bookId}"]`);
+
+    if (isRecommended) {
+        // 추천 취소
+        await axios.delete(`/book/recommend/${bookId}`);
+        this.innerHTML = this.innerHTML.replace(' ♥', ' ♡');
+        if (listBtn) {
+            listBtn.classList.replace('btn-danger', 'btn-outline-danger');
+            listBtn.textContent = '♡ 추천하기';
+        }
+    } else {
+        // 추천 등록
+        await axios.post(`/book/recommend/${bookId}`);
+        this.innerHTML = this.innerHTML.replace(' ♡', ' ♥');
+        if (listBtn) {
+            listBtn.classList.replace('btn-outline-danger', 'btn-danger');
+            listBtn.textContent = '♥ 추천됨';
+        }
+    }
+});
+
+
+// =============================================
 // 검색 폼 submit 이벤트
 //
 // form의 기본 GET 제출을 막고 axios 비동기 방식으로 처리
@@ -388,6 +474,10 @@ document.querySelector('.clearBtn').addEventListener('click', function (e) {
     e.preventDefault();
     e.stopPropagation(); // 이 클릭이 form submit으로 전파되지 않도록 차단
 
+    clearSearch()
+});
+
+function clearSearch() {
     // 검색어 초기화
     currentKeyword = '';
     currentSort = 'id';
@@ -396,7 +486,7 @@ document.querySelector('.clearBtn').addEventListener('click', function (e) {
 
     // 1페이지 전체 목록 로드
     loadList(1);
-});
+}
 
 
 // =============================================

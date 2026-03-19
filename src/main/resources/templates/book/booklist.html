@@ -170,7 +170,15 @@
 
                         <!-- 데이터가 없는 경우: 안내 문구 표시 -->
                         <th:block th:if="${responseDTO == null or responseDTO.dtoList == null or #lists.isEmpty(responseDTO.dtoList)}">
-                            <div class="text-center text-muted py-4">검색 결과가 없습니다.</div>
+                            <div class="text-center text-muted py-4">
+                                <th:block th:if="${param.keyword != null and !#strings.isEmpty(param.keyword)}">
+                                    <p>"<span th:text="${param.keyword}"></span>"에 대한 검색 결과가 없습니다.</p>
+                                    <a th:href="@{/book/booklist}" class="btn btn-outline-secondary btn-sm">전체 목록 보기</a>
+                                </th:block>
+                                <th:block th:unless="${param.keyword != null and !#strings.isEmpty(param.keyword)}">
+                                    <p>검색 결과가 없습니다.</p>
+                                </th:block>
+                            </div>
                         </th:block>
 
                     </div><!-- /.list-group -->
