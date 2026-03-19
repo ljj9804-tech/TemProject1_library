@@ -19,7 +19,7 @@ public class CustomServletConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/js/");
 
         // /css/** 패턴 요청 → src/main/resources/static/css/ 폴더에서 파일 제공
-        // 예) /css/style.css → static/css/style.css
+        // 예) /css/admin_style.css → static/css/admin_style.css
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/");
 
