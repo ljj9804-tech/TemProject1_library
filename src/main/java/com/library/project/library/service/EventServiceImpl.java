@@ -1,8 +1,8 @@
-package com.busanit501.project_library.service;
+package com.library.project.library.service;
 
-import com.busanit501.project_library.domain.Event;
-import com.busanit501.project_library.dto.EventDTO;
-import com.busanit501.project_library.repository.EventRepository;
+import com.library.project.library.dto.EventDTO;
+import com.library.project.library.entity.Event;
+import com.library.project.library.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Log4j2
 @RequiredArgsConstructor
 @Transactional
-public class EventServiceImpl implements com.busanit501.project_library.service.EventService {
+public class EventServiceImpl implements com.library.project.library.service.EventService {
 
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;

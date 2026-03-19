@@ -1,7 +1,7 @@
-package com.busanit501.project_library.controller;
+package com.library.project.library.controller;
 
-import com.busanit501.project_library.dto.EventDTO;
-import com.busanit501.project_library.service.EventService;
+import com.library.project.library.dto.EventDTO;
+import com.library.project.library.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;

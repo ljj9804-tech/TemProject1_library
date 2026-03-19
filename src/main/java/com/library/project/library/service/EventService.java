@@ -1,6 +1,6 @@
-package com.busanit501.project_library.service;
+package com.library.project.library.service;
 
-import com.busanit501.project_library.dto.EventDTO;
+import com.library.project.library.dto.EventDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,4 +1,4 @@
-package com.busanit501.project_library.dto;
+package com.library.project.library.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

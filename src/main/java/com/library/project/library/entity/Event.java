@@ -1,4 +1,4 @@
-package com.busanit501.project_library.domain;
+package com.library.project.library.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

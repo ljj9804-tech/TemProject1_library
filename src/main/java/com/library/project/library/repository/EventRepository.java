@@ -1,6 +1,6 @@
-package com.busanit501.project_library.repository;
+package com.library.project.library.repository;
 
-import com.busanit501.project_library.domain.Event;
+import com.library.project.library.entity.Event;
 import org.springframework.data.domain.Page; // 추가
 import org.springframework.data.domain.Pageable; // 추가
 import org.springframework.data.jpa.repository.JpaRepository;
