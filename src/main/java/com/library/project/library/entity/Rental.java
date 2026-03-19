@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Table(name = "rental")
-public class Rental {
+public class Rental extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,12 +21,14 @@ public class Rental {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
+
+    private int renewCount;
 
     private LocalDate rentalDate;
 
@@ -40,5 +42,10 @@ public class Rental {
     public void returnBook() {
         this.returnDate = LocalDate.now();
         this.status = RentalStatus.RETURNED;
+    }
+
+    // 재대출
+    public void increaseRenewCount(){
+        this.renewCount++;
     }
 }

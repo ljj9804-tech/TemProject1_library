@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class RentalResponseDTO {
 
     private Long rentId;
-    private Long userId;
+    private Long memberId;
     private Long bookId;
     private LocalDate rentalDate;
     private LocalDate dueDate;
@@ -21,7 +21,7 @@ public class RentalResponseDTO {
     public static RentalResponseDTO from(Rental rental){
         return RentalResponseDTO.builder()
                 .rentId(rental.getId())
-                .userId(rental.getUser().getUserId())
+                .memberId(rental.getMember().getId())
                 .bookId(rental.getBook().getId())
                 .rentalDate(rental.getRentalDate())
                 .dueDate(rental.getDueDate())

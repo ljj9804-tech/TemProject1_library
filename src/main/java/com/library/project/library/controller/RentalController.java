@@ -17,6 +17,11 @@ public class RentalController {
 
     private final RentalService rentalService;
 
+    @GetMapping("/rental")
+    public String rentalPage() {
+        return "rental/rental";
+    }
+
     /**
      * 📌 도서 대출
      */
@@ -40,16 +45,22 @@ public class RentalController {
         return ResponseEntity.ok("반납 완료");
     }
 
+    // 재대출
+    @PostMapping("/renew/{id}")
+    public ResponseEntity<String> renewBook(@PathVariable Long id){
+        rentalService.renewBook(id);
+        return ResponseEntity.ok("재대출 완료");
+    }
 
     /**
      * 📌 사용자 대출 목록 조회
      */
-    @GetMapping("/user/{userId}")
+    @GetMapping("/member/{MemberId}")
     public ResponseEntity<List<RentalResponseDTO>> getUserRentals(
-            @PathVariable Long userId) {
+            @PathVariable Long MemberId) {
 
         List<RentalResponseDTO> rentals =
-                rentalService.getUserRentals(userId);
+                rentalService.getUserRentals(MemberId);
 
         return ResponseEntity.ok(rentals);
     }

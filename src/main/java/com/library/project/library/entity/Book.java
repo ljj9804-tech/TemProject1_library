@@ -23,8 +23,8 @@ public class Book extends BaseEntity {
     private Long id;
 
     // 책 고유 식별자 (네이버 API 제공)
-    // 같은 isbn = 같은 책의 여러 권 → isbn으로 묶어서 처리
-    // 예) isbn=978... 인 row가 3개면 그 책이 3권 있다는 뜻
+// 같은 isbn = 같은 책의 여러 권 → isbn으로 묶어서 처리
+// 예) isbn=978... 인 row가 3개면 그 책이 3권 있다는 뜻
     @Column(length = 50)
     private String isbn;
 
@@ -61,21 +61,27 @@ public class Book extends BaseEntity {
     private List<Rental> rentals = new ArrayList<>();
 
     // 대여/반납 처리 시 status 변경용 메서드
-    // 대여 시: AVAILABLE → RENTED
-    // 반납 시: RENTED → AVAILABLE
+// 대여 시: AVAILABLE → RENTED
+// 반납 시: RENTED → AVAILABLE
     public void setStatus(BookStatus status) {
         this.status = status;
     }
 
     @PrePersist
     private void prePersist() {
-        // 저자 없으면 기본값 세팅
+// 저자 없으면 기본값 세팅
         if (this.author == null || this.author.trim().isEmpty()) {
             this.author = "작자 미상";
         }
-        // status가 null이면 기본값 AVAILABLE로 세팅
+// status가 null이면 기본값 AVAILABLE로 세팅
         if (this.status == null) {
             this.status = BookStatus.AVAILABLE;
         }
     }
+
+    public void rent(){
+        this.status = BookStatus.RENTED;
+    }
+
+
 }
