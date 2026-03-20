@@ -52,7 +52,8 @@ public class MemberServiceImpl implements MemberService {
         Member member = result.orElseThrow();
 
         // 엔티티의 change 메서드를 사용하여 데이터 수정 (Dirty Checking)
-        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion());
+//        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion());
+        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion(), memberDTO.getMpw());
 
         memberRepository.save(member);
     }
@@ -93,5 +94,30 @@ public class MemberServiceImpl implements MemberService {
     public boolean checkEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
+
+
+    // 20260320 아이디/비밀번호 찾기 추가
+    @Override
+    public String findId(String mname, String email) {
+        log.info("서비스로 넘어온 값: " + mname + ", " + email); // 여기서 로그를 찍어보세요!
+        return memberRepository.findByMnameAndEmail(mname, email)
+                .map(Member::getMid)
+                .orElse(null);
+    }
+
+    @Override
+    public boolean checkMemberForPw(String mid, String email) {
+        return memberRepository.findByMidAndEmail(mid, email).isPresent();
+    }
+
+    @Override
+    public void updatePassword(String mid, String newPw) {
+        Member member = memberRepository.findByMid(mid)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 암호화 없이 바로 저장 (나중에 암호화 로직으로 교체 예정)
+        member.change(member.getMname(), member.getEmail(), member.getRegion(), newPw);
+    }
+
 
 }

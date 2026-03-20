@@ -94,4 +94,73 @@ public class MemberServiceTests {
         }
         log.info("--------------------------------------");
     }
+
+
+
+    @Test
+    @DisplayName("5. 아이디 찾기 테스트")
+    public void testFindId() {
+        log.info("--------------------------------------");
+        log.info("아이디 찾기 테스트 시작");
+
+        // 가입 시 입력한 이름과 이메일
+        String mname = "테스터01";
+        String email = "tester01@library.com";
+
+        // 서비스 메서드 호출: findId
+        String foundMid = memberService.findId(mname, email);
+
+        if (foundMid != null) {
+            log.info("찾은 아이디(mid): " + foundMid);
+        } else {
+            log.error("아이디 찾기 실패: 일치하는 정보 없음");
+        }
+        log.info("--------------------------------------");
+    }
+
+    @Test
+    @DisplayName("6. 비밀번호 찾기(본인확인) 테스트")
+    public void testCheckMemberForPw() {
+        log.info("--------------------------------------");
+        log.info("비밀번호 변경 전 본인확인 테스트");
+
+        String mid = "user1";
+        String email = "user1@test.com";
+
+        // 서비스 메서드 호출: checkMemberForPw
+        boolean isExists = memberService.checkMemberForPw(mid, email);
+
+        if (isExists) {
+            log.info("본인 확인 성공: 비밀번호 변경 단계로 진행 가능");
+        } else {
+            log.error("본인 확인 실패: 아이디 또는 이메일 불일치");
+        }
+        log.info("--------------------------------------");
+    }
+
+    @Test
+    @DisplayName("7. 비밀번호 변경 테스트 (암호화 미적용 단계)")
+    public void testUpdatePassword() {
+        log.info("--------------------------------------");
+        log.info("비밀번호 변경 테스트 시작");
+
+        String mid = "tester01";
+        String newPw = "9999"; // 새 비밀번호
+
+        try {
+            // 서비스 메서드 호출: updatePassword
+            memberService.updatePassword(mid, newPw);
+            log.info("비밀번호 변경 로직 실행 완료");
+
+            // 변경 후 실제로 데이터가 바뀌었는지 조회해서 확인
+            MemberDTO updatedDTO = memberService.readOne(mid);
+            log.info("변경 후 DB에 저장된 비밀번호: " + updatedDTO.getMpw());
+
+        } catch (Exception e) {
+            log.error("비밀번호 변경 실패: " + e.getMessage());
+        }
+        log.info("--------------------------------------");
+    }
+
+
 }

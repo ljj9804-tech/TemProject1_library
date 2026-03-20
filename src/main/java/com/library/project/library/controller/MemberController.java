@@ -183,6 +183,53 @@ public class MemberController {
         return memberService.checkEmail(email) ? "exist" : "ok";
     }
 
+    // 20260320 아이디/비밀번호 찾기 추가
+    // 아이디/비번 찾기 페이지 이동
+    @GetMapping("/find")
+    public void findGet() {
+    }
+
+    // 1. 아이디 찾기 처리
+    @PostMapping("/find-id")
+    public String findIdPost(String mname, String email, RedirectAttributes redirectAttributes) {
+        String mid = memberService.findId(mname, email);
+        if (mid != null) {
+            redirectAttributes.addFlashAttribute("foundMid", mid);
+        } else {
+            redirectAttributes.addFlashAttribute("errorId", "fail");
+        }
+        return "redirect:/member/find";
+    }
+
+    // 2. 비밀번호 찾기 (정보 확인 후 변경 페이지 이동)
+    @PostMapping("/find-pw")
+    public String findPwPost(String mid, String email, Model model, RedirectAttributes redirectAttributes) {
+        log.info("비밀번호 찾기 시도: mid=" + mid + ", email=" + email);
+
+        if (memberService.checkMemberForPw(mid, email)) {
+            // [수정 제안] Forward 방식 유지 시 model에 mid가 잘 담겨야 change-pw.html에서 사용 가능합니다.
+            model.addAttribute("mid", mid);
+            return "member/change-pw";
+        }
+
+        // 실패 시 메시지 전달
+        log.warn("비밀번호 찾기 실패: 정보 불일치");
+        redirectAttributes.addFlashAttribute("errorPw", "fail");
+        return "redirect:/member/find";
+    }
+
+    // 3. 비밀번호 실제 변경 처리
+    @PostMapping("/change-pw")
+    public String changePwPost(String mid, String newPw, RedirectAttributes redirectAttributes) {
+        log.info("비밀번호 변경 처리 시작: mid=" + mid);
+
+        memberService.updatePassword(mid, newPw);
+
+        // [수정 제안] 변경 완료 메시지를 담아서 로그인 창으로 보냅니다.
+        redirectAttributes.addFlashAttribute("result", "pwChanged");
+        return "redirect:/member/login";
+    }
+
 
 
 

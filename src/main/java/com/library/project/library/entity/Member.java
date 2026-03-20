@@ -37,10 +37,11 @@ public class Member extends BaseEntity {
     // 눈에 보이지 않지만, BaseEntity를 이용해서, regDate, modDate 도 추가가 될 예정.
 
     // 정보 수정 메서드 (내 서재/마이페이지용)
-    public void change(String mname, String email, String region) {
+    public void change(String mname, String email, String region, String mpw) {
         this.mname = mname;
         this.email = email;
         this.region = region;
+        this.mpw = mpw;
     }
 
 
