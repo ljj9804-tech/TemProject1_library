@@ -28,6 +28,17 @@
             user-select: none;
         }
 
+        #header-logo{display: inline-block;
+            width: auto;
+            height: 70px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 24px;}
+        #header-logo>img{    width: auto;
+            height: 100%;}
+
+
         @media (min-width: 768px) {
             .bd-placeholder-img-lg {
                 font-size: 3.5rem;
@@ -46,7 +57,7 @@
     z-index: 9999;
 ">
     <a href="/" id="header-logo">
-        <img src="/images/페페1.jpg" alt="로고" style="width:40px; height:40px; border-radius:8px; cursor:pointer;">
+        <img src="/images/logo.png" alt="로고">
     </a>
     <button class="hamburger" id="hamburgerBtn">&#9776;</button>
     <ul class="header-nav">
@@ -198,7 +209,7 @@
 </nav>
 
 <th:block th:unless="${currentURI == '/'}">
-    <div id="page-title" class="d-flex align-items-center justify-content-center fw-bold fs-4" style="margin-top: 101px; height: 100px; background-color: #dc3545;">
+    <div id="page-title" class="d-flex align-items-center justify-content-center fw-bold fs-4" style="margin-top: 100px; height: 100px; background-color: #dc3545;">
     </div>
 </th:block>
 
