@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<body>
+<div layout:fragment="content">
+    <div class="row mt-3 justify-content-center">
+        <div class="col-md-8">
+            <!-- 1. 아이디 찾기 카드 -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">아이디 찾기</div>
+                <div class="card-body">
+                    <form action="/member/find-id" method="post">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이름</span>
+                            <input type="text" name="mname" class="form-control" placeholder="가입 시 등록한 성함" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이메일</span>
+                            <input type="email" name="email" class="form-control" placeholder="example@lib.com" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">아이디 찾기</button>
+                        </div>
+                    </form>
+
+                    <!-- 결과 메시지 -->
+                    <div th:if="${foundMid}" class="mt-3 alert alert-success text-center">
+                        찾으시는 아이디는 [ <strong th:text="${foundMid}"></strong> ] 입니다.
+                    </div>
+                    <div th:if="${errorId}" class="mt-3 alert alert-danger text-center">
+                        일치하는 정보가 없습니다. 다시 확인해주세요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 비밀번호 재설정 본인 확인 카드 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">비밀번호 재설정 (본인 확인)</div>
+                <div class="card-body">
+                    <form action="/member/find-pw" method="post">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">아이디</span>
+                            <input type="text" name="mid" class="form-control" placeholder="아이디 입력" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이메일</span>
+                            <input type="email" name="email" class="form-control" placeholder="가입 시 등록한 이메일" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-dark">본인 확인 후 비밀번호 변경</button>
+                        </div>
+                    </form>
+
+                    <!-- 실패 메시지 -->
+                    <div th:if="${errorPw}" class="mt-3 alert alert-danger text-center">
+                        아이디 또는 이메일 정보가 일치하지 않습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script layout:fragment="script" th:inline="javascript">
+</script>
+
+</body>
+</html>
