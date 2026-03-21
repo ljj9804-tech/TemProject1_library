@@ -18,6 +18,10 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 내부 PK
 
+    @OneToMany(mappedBy = "member")
+    @Builder.Default
+    private List<BookRequest> bookRequests = new ArrayList<>();
+
     @Column(length = 50, nullable = false, unique = true)
     private String mid; // 로그인 아이디
 

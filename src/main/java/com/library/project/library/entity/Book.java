@@ -60,6 +60,15 @@ public class Book extends BaseEntity {
     @Builder.Default
     private List<Rental> rentals = new ArrayList<>();
 
+    @OneToMany(mappedBy = "book")
+    @Builder.Default
+    private List<BookRequest> bookRequests = new ArrayList<>();
+
+    public void addRental(Rental rental) {
+        this.rentals.add(rental);
+        rental.setBook(this);  // 반대쪽도 동기화
+    }
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Recommend> recommends = new ArrayList<>();
