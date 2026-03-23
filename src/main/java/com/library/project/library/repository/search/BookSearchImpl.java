@@ -3,6 +3,7 @@ package com.library.project.library.repository.search;
 import com.library.project.library.entity.Book;
 import com.library.project.library.entity.QBook;
 import com.library.project.library.entity.QRecommend;
+import com.library.project.library.entity.QRental;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -38,7 +39,7 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
     public Page<Book> searchDistinctAll(String keyword, String keywordNor, String keywordCho, String sort, Pageable pageable) {
         QBook book = QBook.book;
         QRecommend recommend = QRecommend.recommend;
-        // QRentalHistory rental = QRentalHistory.rentalHistory;
+        QRental rental = QRental.rental;
         JPQLQuery<Book> query = from(book);
 
         // isbn별 가장 먼저 저장된 row의 id(min)를 서브쿼리로 추출
@@ -88,10 +89,10 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
             case "rental":
                 // ===============================
                 // 렌탈 수 기준 내림차순 정렬
-                /*query.leftJoin(rental).on(rental.book.id.eq(book.id))
+                query.leftJoin(rental).on(rental.book.id.eq(book.id))
                         .groupBy(book.id)
                         .orderBy(rental.count().desc());
-                if(priority != null)    query.orderBy(priority.asc());*/
+                if(priority != null)    query.orderBy(priority.asc());
                 // ===============================
                 break;
             case "pubdate":

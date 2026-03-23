@@ -176,18 +176,61 @@ document.querySelector('.list-group').addEventListener('click', function (e) {
         // 대여 상태에 따라 뱃지 색상과 버튼 텍스트/스타일을 다르게 표시
         const statusEl = document.getElementById('detail-status');
         const actionBtn = document.getElementById('detail-action-btn');
+        if (result.status === 'AVAILABLE') {
+            statusEl.textContent = '대여 가능';
+            statusEl.className = 'badge bg-success';
+        } else {
+            statusEl.textContent = '대여 불가';
+            statusEl.className = 'badge bg-secondary';  // 회색 뱃지
+        }
+
         if(loginInfo) {
-            if (result.status === 'AVAILABLE') {
-                statusEl.textContent = '대여 가능';
-                statusEl.className = 'badge bg-success';    // 초록색 뱃지
-                actionBtn.textContent = '대여하기';
-                actionBtn.className = 'btn btn-success';
+            if(result.requestPending) {
+                actionBtn.textContent = '예약 취소하기';
+                actionBtn.className = 'btn btn-warning';
+                actionBtn.onclick = () => cancelRequest(result.isbn).then(() => {
+                    // 리스트 아이템에서 '예약 중' 뱃지 제거
+                    const badgeWrap = document.getElementById(`badge-wrap-${currentBookId}`);
+                    if (badgeWrap) {
+                        const warningBadge = badgeWrap.querySelector('.bg-warning');
+                        if (warningBadge) warningBadge.remove();
+                    }
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookDetailModal'));
+                    if (modal) modal.hide();
+
+                    alert('예약이 취소되었습니다.');
+                }).catch(e => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookDetailModal'));
+                    if (modal) modal.hide();
+                    if (e.response?.status !== 401) alert("오류가 발생했습니다.");
+                });
             } else {
-                statusEl.textContent = '대여 불가';
-                statusEl.className = 'badge bg-secondary';  // 회색 뱃지
-                actionBtn.textContent = '닫기';
-                actionBtn.className = 'btn btn-secondary';
+                actionBtn.textContent = '대여 예약하기';
+                actionBtn.className = 'btn btn-success';
+                actionBtn.onclick = () => requestBook(result.id).then(() => {
+                    const badgeWrap = document.getElementById(`badge-wrap-${currentBookId}`);
+                    if (badgeWrap && !badgeWrap.querySelector('.bg-warning')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-warning text-dark';
+                        badge.textContent = '예약 중';
+                        badgeWrap.prepend(badge);
+                    }
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookDetailModal'));
+                    if (modal) modal.hide();
+
+                    alert('대출 예약이 완료되었습니다!');
+                }).catch(e => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookDetailModal'));
+                    if (modal) modal.hide();
+                    if (e.response?.status !== 401) alert("오류가 발생했습니다.");
+                });
             }
+        } else {
+            actionBtn.textContent = '닫기';
+            actionBtn.className = 'btn btn-secondary';
+            actionBtn.onclick = () => bootstrap.Modal.getInstance(document.getElementById('bookDetailModal')).hide();
         }
 
         // 상세 모달 표시
@@ -280,5 +323,17 @@ async function deleteRecomm(bookId) {
 
 async function selectBookDetail(bookId) {
     const result = await axios.get(`/book/${bookId}`);
+    return result.data;
+}
+
+async function requestBook(bookId) {
+    const memberId = loginInfo.id;
+    const result = await axios.post('/api/requests', { memberId, bookId });
+    return result.data;
+}
+
+async function cancelRequest(isbn) {
+    const memberId = loginInfo.id;
+    const result = await axios.delete(`/api/requests/${memberId}/${isbn}`);
     return result.data;
 }

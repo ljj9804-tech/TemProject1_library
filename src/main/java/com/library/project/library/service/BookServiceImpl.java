@@ -9,7 +9,9 @@ import com.library.project.library.entity.Book;
 import com.library.project.library.entity.Member;
 import com.library.project.library.entity.Recommend;
 import com.library.project.library.enums.BookStatus;
+import com.library.project.library.enums.RequestStatus;
 import com.library.project.library.repository.BookRepository;
+import com.library.project.library.repository.BookRequestRepository;
 import com.library.project.library.repository.MemberRepository;
 import com.library.project.library.repository.RecommendRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class BookServiceImpl implements BookService {
     private final ModelMapper modelMapper;
     private final KoreanDecomposer koreanDecomposer;
     private final MemberRepository memberRepository;
+    private final BookRequestRepository bookRequestRepository;
 
     @Override
     public PageResponseDTO<BookDTO> list(PageRequestDTO pageRequestDTO, Long memberId) {
@@ -60,17 +63,26 @@ public class BookServiceImpl implements BookService {
 
         // ── 배치 조회: 책 목록 전체의 isbn/id를 한꺼번에 IN 쿼리로 조회 ──────────
         // stream().map()으로 books 리스트에서 isbn/id만 추출해서 리스트로 만듦
-        List<String> isbns = books.stream().map(book -> book.getIsbn()).collect(Collectors.toList());
         List<Long> bookIds = books.stream().map(book -> book.getId()).collect(Collectors.toList());
 
-        // isbn 목록 중 AVAILABLE 상태인 isbn만 Set으로 저장
-        // Set을 쓰는 이유: contains() 조회가 O(1)로 빠름 (List는 O(n))
-        Set<String> availableIsbns = isbns.isEmpty() ? new HashSet<>()
-                : new HashSet<>(bookRepository.findAvailableIsbnIn(isbns, BookStatus.AVAILABLE));   //isbn이 있으면 빌릴수 있는 책있는지 찾아서 중복 제거해서 넣어줌
-
-        // bookId 목록 중 추천 기록이 있는 bookId만 Set으로 저장
-        Set<Long> recommendedBookIds = (bookIds.isEmpty() || memberId == null) ? new HashSet<>()
-                : new HashSet<>(recommendRepository.findBookIdsByBookIdIn(bookIds, memberId));    //id가 있으면 추천한 책을 찾는다. 중복 제거 해서
+        // 비로그인: isbn별 대여 가능 여부 / 로그인: 예약 상태 + 추천 여부
+        final Set<String> availableIsbns;   //람다식으로 사용하기 위해 final로 선언(추후 함수 끝나기 전에 무조건 초기화를 진행해줘야 한다.)
+        final Set<String> recommendedBookIds;
+        final Set<String> requestBookIsbn;
+        List<String> isbns = books.stream().map(book -> book.getIsbn()).collect(Collectors.toList());
+        if (memberId == null) {
+            availableIsbns = isbns.isEmpty() ? new HashSet<>()
+                    : new HashSet<>(bookRepository.findAvailableIsbnIn(isbns, BookStatus.AVAILABLE));
+            recommendedBookIds = new HashSet<>();
+            requestBookIsbn = new HashSet<>();
+        } else {
+            availableIsbns = isbns.isEmpty() ? new HashSet<>()
+                    : new HashSet<>(bookRepository.findAvailableIsbnIn(isbns, BookStatus.AVAILABLE));
+            requestBookIsbn = isbns.isEmpty() ? new HashSet<>()
+                    : new HashSet<>(bookRequestRepository.findBookIsbnsByMemberIdAndBookIsbnInAndStatus(memberId, isbns, RequestStatus.PENDING));
+            recommendedBookIds = bookIds.isEmpty() ? new HashSet<>()
+                    : new HashSet<>(recommendRepository.findBookIdsByBookIsbnIn(isbns, memberId));
+        }
 
         // ── Book → BookDTO 변환 ────────────────────────────────────────────────
         List<BookDTO> dtoList = books.stream()
@@ -83,10 +95,12 @@ public class BookServiceImpl implements BookService {
                     dto.setStatus(availableIsbns.contains(book.getIsbn())
                             ? BookStatus.AVAILABLE
                             : BookStatus.RENTED);
-
-                    // 추천 여부: 이 bookId에 추천 기록이 있으면 true
-                    // → 프론트에서 추천 버튼 초기 상태(♥ 추천됨 / ♡ 추천하기) 결정에 사용
-                    dto.setRecommended(memberId != null ? recommendedBookIds.contains(book.getId()) : null);
+                    if(memberId != null) {
+                        dto.setRequestPending(requestBookIsbn.contains(book.getIsbn()));
+                        // 추천 여부: 이 bookId에 추천 기록이 있으면 true
+                        // → 프론트에서 추천 버튼 초기 상태(♥ 추천됨 / ♡ 추천하기) 결정에 사용
+                        dto.setRecommended(recommendedBookIds.contains(book.getIsbn()));
+                    }
 
                     return dto;
                 })
@@ -112,6 +126,9 @@ public class BookServiceImpl implements BookService {
         dto.setStatus(bookRepository.existsByIsbnAndStatus(book.getIsbn(), BookStatus.AVAILABLE)
                 ? BookStatus.AVAILABLE
                 : BookStatus.RENTED);
+        dto.setRequestPending(memberId != null
+        ? bookRequestRepository.existsByMember_IdAndBook_IdAndStatus(memberId, bookId, RequestStatus.PENDING)
+        : false);
         dto.setRecommended(memberId != null ? recommendRepository.existsByBook_IdAndMember_Id(book.getId(), memberId) : null);
         return dto;
     }

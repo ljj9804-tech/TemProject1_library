@@ -105,4 +105,10 @@ public class BookRequestServiceImpl implements BookRequestService {
                 .map(BookRequestResponseDTO::from)
                 .toList();
     }
+
+    /** 대출 신청 취소 (PENDING 상태인 예약을 ISBN 기준으로 삭제) */
+    @Override
+    public void cancelRequest(Long memberId, String isbn) {
+        bookRequestRepository.deleteByMemberIdAndIsbnAndStatus(memberId, isbn, RequestStatus.PENDING);
+    }
 }

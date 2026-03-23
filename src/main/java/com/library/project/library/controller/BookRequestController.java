@@ -49,6 +49,13 @@ public class BookRequestController {
         return ResponseEntity.ok(bookRequestService.getMyRequests(memberId));
     }
 
+    /** 대출 신청 취소 (회원) DELETE /api/requests/{memberId}/{isbn} */
+    @DeleteMapping("/{memberId}/{isbn}")
+    public ResponseEntity<String> cancelRequest(@PathVariable Long memberId, @PathVariable String isbn) {
+        bookRequestService.cancelRequest(memberId, isbn);
+        return ResponseEntity.ok("신청 취소 완료");
+    }
+
 }
 
 /*

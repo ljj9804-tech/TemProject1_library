@@ -20,8 +20,8 @@ public interface RecommendRepository extends JpaRepository<Recommend, Long> {
     // 특정 회원이 추천한 bookId만 배치 조회 (목록 화면 최적화)
     // 책마다 existsBy~를 호출하면 N번 쿼리 → IN 절로 1번에 해결
     // ─────────────────────────────────────────────────────────────────
-    @Query("SELECT r.book.id FROM Recommend r WHERE r.book.id IN :bookIds AND r.member.id = :memberId")
-    List<Long> findBookIdsByBookIdIn(@Param("bookIds") Collection<Long> bookIds, @Param("memberId") Long memberId);
+    @Query("SELECT r.book.isbn FROM Recommend r WHERE r.book.isbn IN :bookIsbns AND r.member.id = :memberId")
+    List<String> findBookIdsByBookIsbnIn(@Param("bookIsbns") Collection<String> bookIsbns, @Param("memberId") Long memberId);
 
     // 특정 책의 총 추천 수 집계
     int countByBook_Id(Long bookId);

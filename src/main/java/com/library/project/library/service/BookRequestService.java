@@ -21,4 +21,7 @@ public interface BookRequestService {
 
     // 회원별 신청 목록 조회
     List<BookRequestResponseDTO> getMyRequests(Long memberId);
+
+    // 대출 신청 취소 (PENDING 상태인 예약을 ISBN 기준으로 삭제)
+    void cancelRequest(Long memberId, String isbn);
 }

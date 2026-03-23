@@ -179,4 +179,17 @@ class BookRequestServiceTest {
         assertThat(list).isNotEmpty();
         assertThat(list.get(0).getMemberId()).isEqualTo(testMember.getId());
     }
+
+    @Test
+    @DisplayName("대출 신청 취소 (ISBN 기준)")
+    void cancelRequest_success() {
+        // given - 신청
+        bookRequestService.requestBook(
+                BookRequestDTO.builder()
+                        .memberId(testMember.getId())
+                        .bookId(testBook.getId())
+                        .build()
+        );
+        bookRequestService.cancelRequest(testMember.getId(), testBook.getIsbn());
+    }
 }
