@@ -9,13 +9,16 @@ public interface InfoService {
 
     List<LibraryStatsDTO> getLibraryStatistics();
 
-    // CRUD 추가
-    void registerStat(LibraryStatsDTO dto); // 등록
+    // 아래 메서드를 추가하세요!
+    LibraryStatsDTO getStat(Long statId);
 
-    void modifyStat(LibraryStatsDTO dto);   // 수정
+    // CRUD 추가 부분
+    void registerStat(LibraryStatsDTO dto);
 
-    void removeStat(Long statId);           // 삭제
+    void modifyStat(LibraryStatsDTO dto);
 
+    void removeStat(Long statId);
+}
 
     // 수정 처리를 위한 메서드도 미리 선언해두면 좋습니다.
 }

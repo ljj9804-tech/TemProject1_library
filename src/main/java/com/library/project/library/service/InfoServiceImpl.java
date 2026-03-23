@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +68,20 @@ public class InfoServiceImpl implements InfoService {
     public void removeStat(Long statId) {
         statsRepository.deleteById(statId);
     }
+
+    // 빌드 에러 해결을 위한 메서드 추가 (오버라이딩)
+    public LibraryStatsDTO getStat(Long statId) {
+        Optional<LibraryStatsEntity> result = statsRepository.findById(statId);
+        LibraryStatsEntity entity = result.orElseThrow();
+
+        // ModelMapper 없이 수동으로 DTO 만들기 (에러 즉시 해결됨)
+        return LibraryStatsDTO.builder()
+                .statId(entity.getStatId())
+                .categoryName(entity.getCategoryName())
+                .itemCount(Math.toIntExact(entity.getItemCount()))
+                .build();
+    }
+}
 }
 
 /*
