@@ -84,11 +84,22 @@ public class MemberController {
 
             // 1. 비밀번호가 일치하면 (성공)
             if(memberDTO.getMpw().equals(mpw)) {
-                session.setAttribute("loginInfo", memberDTO); // 세션에 저장
+                /*session.setAttribute("loginInfo", memberDTO); // 세션에 저장
                 log.info("로그인 성공! 마이페이지로 이동합니다.");
 
                 // [중요] 성공 시 리턴 경로는 마이페이지입니다!
-                return "redirect:/member/mypage?mid=" + mid;
+                return "redirect:/member/mypage?mid=" + mid;*/
+
+                session.setAttribute("loginInfo", memberDTO);
+
+                // ⭐ 세션에 저장된 '가려던 주소(dest)'가 있는지 확인!
+                String dest = (String) session.getAttribute("dest");
+                session.removeAttribute("dest"); // 쓴 다음엔 지워주기
+
+                if (dest != null) {
+                    return "redirect:" + dest; // 원래 가려던 곳으로!
+                }
+                return "redirect:/member/mypage?mid=" + mid; // 없으면 마이페이지로
             }
             // 2. 비밀번호가 틀리면 (실패)
             else {

@@ -19,15 +19,30 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         response.setDateHeader("Expires", 0);
 
         // 수정전 - 세션 없으면 새로 만들어서 JSESSIONID 계속 발급됨
-        /*HttpSession session = request.getSession();*/
+        // HttpSession session = request.getSession();
         // 수정후 - false: 세션 없으면 새로 만들지 않고 null 반환
         HttpSession session = request.getSession(false);
 
         // 세션에 loginInfo(로그인 정보)가 없으면 로그인 페이지로 튕겨내기
-        if (session.getAttribute("loginInfo") == null) {
-            log.info("로그인 정보 없음! 로그인 페이지로 이동합니다.");
+//        if (session.getAttribute("loginInfo") == null) {
+//            log.info("로그인 정보 없음! 로그인 페이지로 이동합니다.");
+//            response.sendRedirect("/member/login");
+//            return false; // 컨트롤러로 못 가게 막음
+//        }
+
+
+        // ✅ 세션 상태 로그 추가
+        if (session != null) {
+            log.info("세션 ID: " + session.getId());
+            log.info("세션 만료시간(초): " + session.getMaxInactiveInterval());
+            log.info("loginInfo: " + session.getAttribute("loginInfo"));
+        } else {
+            log.info("세션 없음!");
+        }
+
+        if (session == null || session.getAttribute("loginInfo") == null) {
             response.sendRedirect("/member/login");
-            return false; // 컨트롤러로 못 가게 막음
+            return false;
         }
 
         return true; // 로그인 되어 있으면 통과!
