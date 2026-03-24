@@ -358,3 +358,45 @@
 </div>
 </body>
 </html>
+
+
+======================================================================================컨트롤러
+
+
+
+
+//     내 시설 예약 신청 내역 목록
+//    로그인 없이 화면 띄우기 목적 임시 코드
+//    @GetMapping("/myFacilityList")
+//    public String getMyFacilityList(Model model, HttpSession session) {
+//
+//        // [임시 코드] 로그인이 자꾸 풀린다면, 테스트를 위해 강제로 세션을 넣어줍니다.
+//        if (session.getAttribute("loginInfo") == null) {
+//            log.info("테스트를 위해 임시 세션을 생성합니다.");
+//            MemberDTO testMember = MemberDTO.builder()
+//                    .mid("test_user") // 실제 DB에 있는 아이디
+//                    .mname("테스트유저")
+//                    .build();
+//            session.setAttribute("loginInfo", testMember);
+//        }
+//
+//        // 이제 인터셉터가 와도 "loginInfo가 있네?" 하고 통과시켜줍니다.
+//        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
+//        String mid = loginInfo.getMid();
+//
+//        List<ApplyDTO> applyList = applyService.getApplyListByMid(mid);
+//        model.addAttribute("applyList", applyList);
+//        model.addAttribute("totalCount", applyList.size());
+//
+//        return "member/myFacilityList";
+//    }
+//
+//    // JSON 데이터를 반환하는 상세 조회 API (Ajax용)
+//    @GetMapping("/readApi")
+//    @ResponseBody // 💡 페이지가 아닌 데이터를 리턴하게 합니다.
+//    public ApplyDTO readApi(Long ano) {
+//        log.info("Ajax 상세 조회 번호: " + ano);
+//
+//        // 서비스 호출 (기존에 만들어둔 getApply 메서드 활용)
+//        return applyService.getApply(ano);
+//    }
