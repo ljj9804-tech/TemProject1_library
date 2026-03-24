@@ -11,7 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/busan-library-common.css}">
 
     <style>
-        /* [1] 이용 절차 스타일 (호버 효과 삭제) */
+        /* [1] 이용 절차 스타일 */
         .step-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .step-box {
             flex: 1;
@@ -32,14 +32,13 @@
         .guide-list li { position: relative; padding-left: 20px; margin-bottom: 8px; color: #555; font-size: 0.95rem; }
         .guide-list li::before { content: "•"; position: absolute; left: 0; color: #004085; font-weight: bold; }
 
-        /* [3] 테이블 스타일 */
+        /* [3] 테이블 및 공통 스타일 */
         .table-wrap { border-top: 2px solid #004085; }
         .required { color: #dc3545; margin-left: 3px; }
 
         /* [4] 모달 커스텀 */
         .modal-header { background-color: #004085; color: #fff; }
         .modal-title { font-weight: 700; }
-        .form-section-title { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #444; font-weight: 600; margin-top: 20px; }
 
         @media (max-width: 768px) {
             .step-container { flex-direction: column; }
@@ -97,20 +96,16 @@
             </ul>
         </div>
 
-        <div id="apply-section" class="py-5 text-center bg-white rounded-3">
+        <div id="apply-section" class="py-5 text-center bg-white rounded-3 border">
             <h4 class="mb-3" style="font-weight: 700;">온라인 시설 대관 신청</h4>
-            <div sec:authorize="isAnonymous()">
-                <p class="text-muted mb-4">로그인 후 간편하게 온라인 신청서를 작성해 보세요!</p>
-                <a th:href="@{/member/login}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill" style="border-width: 2px; font-weight: 600;">로그인 하러 가기</a>
-            </div>
-            <div sec:authorize="isAuthenticated()">
-                <p class="text-muted mb-4">아래 버튼을 클릭하여 신청서를 작성해 주세요.</p>
-                <button type="button" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-lg"
-                        style="background-color: #004085; border: none; font-weight: 600;"
-                        data-bs-toggle="modal" data-bs-target="#applyModal">
-                    신청서 작성 시작하기 <i class="fas fa-edit ms-2"></i>
-                </button>
-            </div>
+
+            <p class="text-muted mb-4">로그인 후 간편하게 온라인 신청서를 작성해 보세요!</p>
+
+            <button type="button" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-lg"
+                    style="background-color: #004085; border: none; font-weight: 600;"
+                    th:onclick="checkLoginAndShowModal()">
+                신청서 작성 시작하기 <i class="fas fa-edit ms-2"></i>
+            </button>
         </div>
     </div>
 
@@ -118,22 +113,22 @@
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header border-0 p-4">
-                    <h5 class="modal-title">온라인 시설 대관 신청서</h5>
+                    <h5 class="modal-title text-white">온라인 시설 대관 신청서</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4 p-md-5">
                     <form th:action="@{/apply/register}" th:object="${applyDTO}" method="post" id="applyForm">
                         <div class="mb-3">
                             <label class="form-label fw-bold">신청자<span class="required">*</span></label>
-                            <input type="text" th:field="*{applicantName}" id="applicantName" class="form-control">
+                            <input type="text" th:field="*{applicantName}" id="applicantName" class="form-control" placeholder="성명을 입력하세요">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">연락처<span class="required">*</span></label>
-                            <input type="tel" th:field="*{phone}" id="phone" class="form-control">
+                            <input type="tel" th:field="*{phone}" id="phone" class="form-control" placeholder="010-0000-0000">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">행사명<span class="required">*</span></label>
-                            <input type="text" th:field="*{eventName}" id="eventName" class="form-control">
+                            <input type="text" th:field="*{eventName}" id="eventName" class="form-control" placeholder="행사 제목을 입력하세요">
                         </div>
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
@@ -147,7 +142,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">참석인원<span class="required">*</span></label>
-                                <input type="number" th:field="*{participants}" id="participants" class="form-control">
+                                <input type="number" th:field="*{participants}" id="participants" class="form-control" placeholder="명">
                             </div>
                         </div>
                         <div class="row g-3 mb-3">
@@ -164,6 +159,15 @@
                                     <option value="야간">야간 (18~22시)</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">행사 상세 내용</label>
+                                <textarea th:field="*{eventContent}" class="form-control" rows="3" placeholder="내용을 입력하세요."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">문의사항</label>
+                                <textarea th:field="*{inquiryContent}" class="form-control" rows="3" placeholder="내용을 입력하세요."></textarea>
+                            </div>
                         </div>
 
                         <div class="modal-footer border-0 px-0 mt-4">
@@ -177,7 +181,29 @@
     </div>
 
     <script th:inline="javascript">
+
+        function checkLoginAndShowModal() {
+            const isLogin = [[${session.loginInfo != null}]];
+
+            if (!isLogin) {
+                alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.");
+
+                // 현재 페이지 주소를 세션의 'dest'에 저장하기 위해 서버에 잠깐 알립니다.
+                // 컨트롤러에 별도의 목적지 저장용 API가 없다면 아래처럼 간단히 구현 가능합니다.
+                const currentPath = window.location.pathname;
+
+                // [방법 A] 가장 간단한 방법: 로그인 페이지로 이동 시 파라미터로 넘기기
+                // (단, 로그인 페이지 컨트롤러(GET)에서 이걸 세션에 담아줘야 합니다.)
+                location.href = '/member/login?dest=' + encodeURIComponent(currentPath);
+
+            } else {
+                const myModal = new bootstrap.Modal(document.getElementById('applyModal'));
+                myModal.show();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // 연락처 자동 하이픈
             const phoneInput = document.getElementById('phone');
             if (phoneInput) {
                 phoneInput.addEventListener('input', function(e) {
@@ -191,11 +217,13 @@
                 });
             }
 
+            // 날짜 제한 (오늘 이전 선택 불가)
             const dateInput = document.getElementById('applyDate');
             if (dateInput) {
                 dateInput.min = new Date().toISOString().split('T')[0];
             }
 
+            // 폼 유효성 검사
             const applyForm = document.getElementById('applyForm');
             if (applyForm) {
                 applyForm.addEventListener('submit', function(e) {
@@ -215,11 +243,11 @@
                             e.preventDefault();
                             alert(item.name + ' 항목을 입력해 주세요.');
                             if(element) element.focus();
-                            return false;
+                            return;
                         }
                     }
 
-                    if (!confirm("신청하시겠습니까?")) {
+                    if (!confirm("신청서를 제출하시겠습니까?")) {
                         e.preventDefault();
                     } else {
                         const btn = applyForm.querySelector('button[type="submit"]');
@@ -229,9 +257,11 @@
                 });
             }
 
+            // 성공 메시지 알림
             const msg = [[${message}]];
             if (msg) alert(msg);
         });
     </script>
-</div> </body>
+</div>
+</body>
 </html>
