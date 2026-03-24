@@ -120,58 +120,43 @@
     <button class="hamburger" id="hamburgerBtn">&#9776;</button>
     <ul class="header-nav">
         <li class="header-nav-item">
-            <span class="spanTap" data-index="0">Active</span>
+            <span class="spanTap" data-index="0">자료 검색</span>
         </li>
         <li class="header-nav-item">
-            <span class="spanTap" data-index="1">Active</span>
+            <span class="spanTap" data-index="1">신청·예약</span>
         </li>
         <li class="header-nav-item">
-            <span class="spanTap" data-index="2">Active</span>
+            <span class="spanTap" data-index="2">열린공간</span>
         </li>
         <li class="header-nav-item">
-            <span class="spanTap" data-index="3">Active</span>
-        </li>
-        <li class="header-nav-item">
-            <span class="spanTap" data-index="4">Active</span>
-        </li>
-        <li class="header-nav-item">
-            <span class="spanTap" data-index="5">Active</span>
+            <span class="spanTap" data-index="3">도서관안내</span>
         </li>
         <div class="header-nav-content d-flex">
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="0">
-                <li><a href="/book/booklist">책 검색</a></li>
-                <li><a href="/book/booklist">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="0">
+                <li><a href="/book/booklist">소장자료</a></li>
+                <li><a href="/book/booklist?sort=regDate">새로들어온책</a></li>
+                <li><a href="/book/booklist?sort=rental">대출이많은책</a></li>
+                <li><a href="/book/booklist?sort=recommend">추천하는책</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="1">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="1">
+                <li><a href="#">행사·강좌</a></li>
+                <li><a href="/apply/wishBook">비치희망도서</a></li>
+                <li><a href="/apply/spaceReservation">시설예약</a></li>
+                <li><a href="/info/donation">기증·납본</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="2">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
-                <li><a href="#">항목 5</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="2">
+                <li><a href="#">이달의행사</a></li>
+                <li><a href="/notice/list">공지사항</a></li>
+                <li><a href="/inquiry/list">문의사항</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="3">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-            </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="4">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-            </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="5">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
-                <li><a href="#">항목 5</a></li>
-                <li><a href="#">항목 6</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="3">
+                <li><a href="/info/basic">인사말</a></li>
+                <li><a href="/info/basic">연혁</a></li>
+                <li><a href="/info/organization">조직·업무</a></li>
+                <li><a href="/info/basic">자료현황</a></li>
+                <li><a href="/info/facilities">시설현황</a></li>
+                <li><a href="/info/facilities">이용안내</a></li>
+                <li><a href="/info/map">찾아오시는길</a></li>
             </ul>
         </div>
     </ul>
@@ -230,56 +215,41 @@
     <button class="sidebar-close" id="sidebarClose">&times;</button>
     <ul class="sidebar-menu list-unstyled">
         <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
+            <span class="sidebar-tap">자료 검색</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
+                <li><a href="/book/booklist">소장자료</a></li>
+                <li><a href="/book/booklist?sort=regDate">새로들어온책</a></li>
+                <li><a href="/book/booklist?sort=rental">대출이많은책</a></li>
+                <li><a href="/book/booklist?sort=recommend">추천하는책</a></li>
             </ul>
         </li>
         <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
+            <span class="sidebar-tap">신청·예약</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
+                <li><a href="#">행사·강좌</a></li>
+                <li><a href="/apply/wishBook">비치희망도서</a></li>
+                <li><a href="/apply/spaceReservation">시설예약</a></li>
+                <li><a href="/info/donation">기증·납본</a></li>
             </ul>
         </li>
         <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
+            <span class="sidebar-tap">열린공간</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
-                <li><a href="#">항목 5</a></li>
+                <li><a href="#">이달의행사</a></li>
+                <li><a href="/notice/list">공지사항</a></li>
+                <li><a href="/inquiry/list">문의사항</a></li>
             </ul>
         </li>
         <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
+            <span class="sidebar-tap">도서관안내</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-            </ul>
-        </li>
-        <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
-            <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-            </ul>
-        </li>
-        <li class="sidebar-item">
-            <span class="sidebar-tap">Active</span>
-            <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">항목 1</a></li>
-                <li><a href="#">항목 2</a></li>
-                <li><a href="#">항목 3</a></li>
-                <li><a href="#">항목 4</a></li>
-                <li><a href="#">항목 5</a></li>
-                <li><a href="#">항목 6</a></li>
+                <li><a href="/info/basic">인사말</a></li>
+                <li><a href="/info/basic">연혁</a></li>
+                <li><a href="/info/organization">조직·업무</a></li>
+                <li><a href="/info/basic">자료현황</a></li>
+                <li><a href="/info/facilities">시설현황</a></li>
+                <li><a href="/info/facilities">이용안내</a></li>
+                <li><a href="/info/map">찾아오시는길</a></li>
             </ul>
         </li>
     </ul>
@@ -287,8 +257,20 @@
 
 <th:block th:unless="${currentURI == '/'}">
     <div id="page-title" class="d-flex align-items-center justify-content-center fw-bold fs-4" style="margin-top: 100px; height: 100px; background-color: #dc3545;" th:switch="${currentURI}">
-        <span th:case="'/book/booklist'">책 검색</span>
-        <span th:case="*">ㅇㅇㅇ</span>
+        <span th:case="'/book/booklist'" th:text="${param.sort != null and #strings.toString(param.sort) == 'regDate'} ? '새로 들어온 책'
+         : (${param.sort != null and #strings.toString(param.sort) == 'rental'} ? '대출이 많은 책'
+         : (${param.sort != null and #strings.toString(param.sort) == 'recommend'} ? '추천하는 책'
+         : '도서 검색'))">도서 검색</span>
+        <span th:case="'/apply/wishBook'">비치희망도서</span>
+        <span th:case="'/apply/spaceReservation'">시설예약</span>
+        <span th:case="'/info/donation'">기증·납본</span>
+        <span th:case="'/notice/list'">공지사항</span>
+        <span th:case="'/inquiry/list'">문의사항</span>
+        <span th:case="'/info/basic'">인사말</span>
+        <span th:case="'/info/organization'">조직·업무</span>
+        <span th:case="'/info/facilities'">시설현황</span>
+        <span th:case="'/info/map'">찾아오시는길</span>
+        <span th:case="*">-</span>
     </div>
 </th:block>
 

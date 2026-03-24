@@ -63,7 +63,7 @@
                         <span th:if="${param.keyword != null and  !#strings.isEmpty(param.keyword)}">["[[${param.keyword}]]" 검색 결과]</span>
                     </div>
 
-                    <div class="dropdown">
+                    <!--<div class="dropdown">
                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
                                 th:text="${#strings.toString(param.sort) == 'regDate' ? '최신 등록순' :
                                            #strings.toString(param.sort) == 'pubdate' ? '최신 발행순' :
@@ -78,7 +78,7 @@
                             <li><a class="dropdown-item sort-item" th:href="@{/book/booklist(keyword=${param.keyword}, sort='recommend')}">최다 추천순</a></li>
                             <li><a class="dropdown-item sort-item" th:href="@{/book/booklist(keyword=${param.keyword}, sort='rental')}">최다 대여순</a></li>
                         </ul>
-                    </div>
+                    </div>-->
                 </div>
 
                 <!-- =============================================
