@@ -33,13 +33,30 @@ public class CustomServletConfig implements WebMvcConfigurer {
     // 인터셉터 설정
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 관리자 인터셉터
+        registry.addInterceptor(new AdminCheckInterceptor())
+                .addPathPatterns("/rentals");
+        // 일반유저 인터셉터
         registry.addInterceptor(new LoginCheckInterceptor()) // 인터셉터 클래스 이름 확인!
-                .addPathPatterns("/member/mypage", "/member/modify") // 로그인이 필요한 주소들 "/todo/**"
+                .addPathPatterns( // 로그인이 필요한 주소들 "/todo/**"
+//                        "/member/mypage", // 마이페이지
+//                        "/member/modify", // 정보수정
+                        "/member/**",           // 회원 모든페이지
+                        "/user_rentals",        // 나의 대출내역
+                        "/",        // 나의 문의내역
+                        "",                     // 나의 희망도서
+                        "/apply/myFacilityList", // 나의 시설예약
+                        "/mypage/apply-list"    // 나의 행사강좌
+
+                )
                 .excludePathPatterns(
                         "/member/login",
                         "/member/join",
                         "/member/checkId",    // 우리가 만든 아이디 중복 체크 허용
                         "/member/checkEmail", // 이메일 중복 체크 허용
+                        "/member/find",
+                        "/member/find-pw",
+                        "/member/change-pw",
                         "/js/**",
                         "/css/**",
                         "/favicon.ico"
@@ -47,4 +64,19 @@ public class CustomServletConfig implements WebMvcConfigurer {
     }
 
 
+
 }
+
+/*
+ * ========== CustomServletConfig 설명 ==========
+ * - 역할: 정적 리소스 핸들링 + 로그인 체크 인터셉터 설정
+ *
+ * [addResourceHandlers]
+ * - /js/** → static/js/ 폴더
+ * - /css/** → static/css/ 폴더
+ * - /** → static/ 최상위 폴더 (나머지 정적 자원)
+ *
+ * [addInterceptors]
+ * - LoginCheckInterceptor를 /member/mypage, /member/modify에 적용
+ * - 로그인/회원가입/중복체크/정적자원은 인터셉터에서 제외
+ */

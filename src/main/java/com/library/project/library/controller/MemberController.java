@@ -1,10 +1,6 @@
 package com.library.project.library.controller;
 
-import com.library.project.library.dto.InquiryListReplyCountDTO;
 import com.library.project.library.dto.MemberDTO;
-import com.library.project.library.dto.PageRequestDTO;
-import com.library.project.library.dto.PageResponseDTO;
-import com.library.project.library.service.InquiryService;
 import com.library.project.library.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,12 +11,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 
 @Controller
 //@RestController
@@ -31,7 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MemberController {
 
     private final MemberService memberService;
-    private final InquiryService inquiryService;
 
     // 1. 회원가입 화면 (GET) - join.html 연결
 //    @Tag(name = "회원가입 화면 (GET) 테스트",
@@ -192,24 +183,6 @@ public class MemberController {
         return memberService.checkEmail(email) ? "exist" : "ok";
     }
 
-
-    @GetMapping("/myInquiry")
-    public String myInquiry(HttpSession session, PageRequestDTO pageRequestDTO, Model model) {
-        // 세션에서 로그인 정보 가져오기
-        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
-
-        // [방어 코드] 로그인 정보가 없으면 로그인 페이지로 이동
-        if(loginInfo == null) {
-            return "redirect:/member/login";
-        }
-
-        // 서비스 호출 (이제 inquiryService 필드가 선언되었으므로 오류가 나지 않습니다)
-        PageResponseDTO<InquiryListReplyCountDTO> responseDTO =
-                inquiryService.getMyInquiryList(loginInfo.getMid(), pageRequestDTO);
-
-        model.addAttribute("responseDTO", responseDTO);
-        return "member/myInquiry";
-    }
 
 
 
