@@ -1,47 +1,51 @@
 package com.library.project.library.controller;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @RestController
+@Log4j2
 public class FileController {
 
-    @Value("${com.busanit501.upload.path}") // application.properties에 적은 C:\\upload 가져오기
+    @Value("${com.busanit501.upload.path}")
     private String uploadPath;
 
-    @GetMapping("/display")
-    public ResponseEntity<Resource> display(@RequestParam("fileName") String fileName) {
+    @GetMapping("/view/{fileName}")
+    public ResponseEntity<Resource> viewFileGet(@PathVariable String fileName) {
 
-        // 1. 실제 파일 경로 합치기 (C:\\upload\\ + movie/movie1.webp)
-        Resource resource = new FileSystemResource(uploadPath + File.separator + fileName);
+        // 📍 1. 서버가 실제로 어디를 뒤지는지 콘솔(Console)에 찍습니다.
+        String finalPath = uploadPath + File.separator + fileName;
+        log.info("---------------------------------------");
+        log.info("📍 [FileController] 찾는 파일 경로: " + finalPath);
 
+        Resource resource = new FileSystemResource(finalPath);
+
+        // 📍 2. 파일이 진짜 그 자리에 있는지 확인합니다.
         if(!resource.exists()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.error("❌ 에러: 파일이 해당 경로에 존재하지 않습니다!");
+            return ResponseEntity.notFound().build();
         }
 
         HttpHeaders headers = new HttpHeaders();
         try {
-            // 2. 파일의 확장자(jpg, webp 등)를 확인해서 헤더에 담기
-            Path filePath = Paths.get(uploadPath + File.separator + fileName);
-            headers.add("Content-Type", Files.probeContentType(filePath));
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            headers.add("Content-Type", Files.probeContentType(resource.getFile().toPath()));
+        } catch (Exception e) {
+            log.error("❌ 에러: 파일 타입을 읽을 수 없습니다.");
+            return ResponseEntity.internalServerError().build();
         }
 
-        // 3. 사진 데이터 전송!
-        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        log.info("✅ 성공: 파일을 브라우저로 전송합니다.");
+        log.info("---------------------------------------");
+        return ResponseEntity.ok().headers(headers).body(resource);
     }
 }
