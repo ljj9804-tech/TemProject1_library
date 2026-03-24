@@ -185,9 +185,16 @@ document.querySelector('.list-group').addEventListener('click', function (e) {
         }
 
         if(loginInfo) {
-            if(result.requestPending) {
+            if(result.rentedByMe) {
+                // 내가 대여중인 책 → 예약 불가, 닫기 버튼으로 표시
+                actionBtn.textContent = '대여 중인 도서';
+                actionBtn.className = 'btn btn-info';
+                actionBtn.disabled = false;
+                actionBtn.onclick = () => bootstrap.Modal.getInstance(document.getElementById('bookDetailModal')).hide();
+            } else if(result.requestPending) {
                 actionBtn.textContent = '예약 취소하기';
                 actionBtn.className = 'btn btn-warning';
+                actionBtn.disabled = false;
                 actionBtn.onclick = () => cancelRequest(result.isbn).then(() => {
                     // 리스트 아이템에서 '예약 중' 뱃지 제거
                     const badgeWrap = document.getElementById(`badge-wrap-${currentBookId}`);
@@ -208,6 +215,7 @@ document.querySelector('.list-group').addEventListener('click', function (e) {
             } else {
                 actionBtn.textContent = '대여 예약하기';
                 actionBtn.className = 'btn btn-success';
+                actionBtn.disabled = false;
                 actionBtn.onclick = () => requestBook(result.id).then(() => {
                     const badgeWrap = document.getElementById(`badge-wrap-${currentBookId}`);
                     if (badgeWrap && !badgeWrap.querySelector('.bg-warning')) {

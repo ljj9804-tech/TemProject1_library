@@ -286,7 +286,9 @@
 </nav>
 
 <th:block th:unless="${currentURI == '/'}">
-    <div id="page-title" class="d-flex align-items-center justify-content-center fw-bold fs-4" style="margin-top: 100px; height: 100px; background-color: #dc3545;">
+    <div id="page-title" class="d-flex align-items-center justify-content-center fw-bold fs-4" style="margin-top: 100px; height: 100px; background-color: #dc3545;" th:switch="${currentURI}">
+        <span th:case="'/book/booklist'">책 검색</span>
+        <span th:case="*">ㅇㅇㅇ</span>
     </div>
 </th:block>
 

@@ -29,6 +29,7 @@ public class BookDTO {
     private BookStatus status;
     private Boolean recommended;
     private Boolean requestPending;
+    private Boolean rentedByMe;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime regDate;
     @JsonFormat(pattern = "yyyy-MM-dd")

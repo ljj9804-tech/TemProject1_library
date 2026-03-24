@@ -10,10 +10,12 @@ import com.library.project.library.entity.Member;
 import com.library.project.library.entity.Recommend;
 import com.library.project.library.enums.BookStatus;
 import com.library.project.library.enums.RequestStatus;
+import com.library.project.library.enums.RentalStatus;
 import com.library.project.library.repository.BookRepository;
 import com.library.project.library.repository.BookRequestRepository;
 import com.library.project.library.repository.MemberRepository;
 import com.library.project.library.repository.RecommendRepository;
+import com.library.project.library.repository.RentalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -37,6 +39,7 @@ public class BookServiceImpl implements BookService {
     private final KoreanDecomposer koreanDecomposer;
     private final MemberRepository memberRepository;
     private final BookRequestRepository bookRequestRepository;
+    private final RentalRepository rentalRepository;
 
     @Override
     public PageResponseDTO<BookDTO> list(PageRequestDTO pageRequestDTO, Long memberId) {
@@ -69,12 +72,14 @@ public class BookServiceImpl implements BookService {
         final Set<String> availableIsbns;   //람다식으로 사용하기 위해 final로 선언(추후 함수 끝나기 전에 무조건 초기화를 진행해줘야 한다.)
         final Set<String> recommendedBookIds;
         final Set<String> requestBookIsbn;
+        final Set<String> rentedByMeIsbns;  // 내가 현재 대여중인 isbn
         List<String> isbns = books.stream().map(book -> book.getIsbn()).collect(Collectors.toList());
         if (memberId == null) {
             availableIsbns = isbns.isEmpty() ? new HashSet<>()
                     : new HashSet<>(bookRepository.findAvailableIsbnIn(isbns, BookStatus.AVAILABLE));
             recommendedBookIds = new HashSet<>();
             requestBookIsbn = new HashSet<>();
+            rentedByMeIsbns = new HashSet<>();
         } else {
             availableIsbns = isbns.isEmpty() ? new HashSet<>()
                     : new HashSet<>(bookRepository.findAvailableIsbnIn(isbns, BookStatus.AVAILABLE));
@@ -82,6 +87,8 @@ public class BookServiceImpl implements BookService {
                     : new HashSet<>(bookRequestRepository.findBookIsbnsByMemberIdAndBookIsbnInAndStatus(memberId, isbns, RequestStatus.PENDING));
             recommendedBookIds = bookIds.isEmpty() ? new HashSet<>()
                     : new HashSet<>(recommendRepository.findBookIdsByBookIsbnIn(isbns, memberId));
+            rentedByMeIsbns = isbns.isEmpty() ? new HashSet<>()
+                    : new HashSet<>(rentalRepository.findRentedIsbnsByMemberIdAndIsbnIn(memberId, isbns, RentalStatus.RENTED));
         }
 
         // ── Book → BookDTO 변환 ────────────────────────────────────────────────
@@ -100,6 +107,9 @@ public class BookServiceImpl implements BookService {
                         // 추천 여부: 이 bookId에 추천 기록이 있으면 true
                         // → 프론트에서 추천 버튼 초기 상태(♥ 추천됨 / ♡ 추천하기) 결정에 사용
                         dto.setRecommended(recommendedBookIds.contains(book.getIsbn()));
+                        // 내가 현재 대여중인 책인지 여부
+                        // → 대여중인 책에 대해 예약 버튼 비활성화에 사용
+                        dto.setRentedByMe(rentedByMeIsbns.contains(book.getIsbn()));
                     }
 
                     return dto;
@@ -130,6 +140,10 @@ public class BookServiceImpl implements BookService {
         ? bookRequestRepository.existsByMember_IdAndBook_IdAndStatus(memberId, bookId, RequestStatus.PENDING)
         : false);
         dto.setRecommended(memberId != null ? recommendRepository.existsByBook_IdAndMember_Id(book.getId(), memberId) : null);
+        // 내가 이 isbn의 책을 현재 대여중인지 확인
+        dto.setRentedByMe(memberId != null
+                ? rentalRepository.findRentedIsbnsByMemberIdAndIsbnIn(memberId, List.of(book.getIsbn()), RentalStatus.RENTED).contains(book.getIsbn())
+                : false);
         return dto;
     }
 

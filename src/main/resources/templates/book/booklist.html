@@ -119,8 +119,9 @@
                                         <!--d-flex는 가로로 배치이고 d-flex flex-column은 세로로 배치-->
                                         <div class="d-flex flex-column align-items-end gap-1">
 
-                                            <!-- 대여 상태 뱃지 + 예약 중 뱃지 (가로 배치) -->
+                                            <!-- 대여 상태 뱃지 + 예약 중 뱃지 + 대여 중 뱃지 (가로 배치) -->
                                             <div class="d-flex gap-1" th:id="'badge-wrap-' + ${dto.id}">
+                                                <span class="badge bg-info text-dark" th:if="${dto.rentedByMe != null and dto.rentedByMe and session.loginInfo != null}" th:text="'대여 중'"></span>
                                                 <span class="badge bg-warning text-dark" th:if="${dto.requestPending != null and dto.requestPending and session.loginInfo != null}" th:text="'예약 중'"></span>
                                                 <span class="badge"
                                                       th:classappend="${dto.status.name() == 'AVAILABLE'} ? 'bg-success' : 'bg-secondary'"

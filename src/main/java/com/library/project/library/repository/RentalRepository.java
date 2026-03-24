@@ -24,6 +24,16 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
 """)
     List<Object[]> findMostRentedBooks();
 
+    // 회원이 현재 대여중인 isbn 목록 (배치 조회용)
+    @Query("""
+        SELECT r.book.isbn
+        FROM Rental r
+        WHERE r.member.id = :memberId
+        AND r.book.isbn IN :isbns
+        AND r.status = :status
+    """)
+    List<String> findRentedIsbnsByMemberIdAndIsbnIn(Long memberId, List<String> isbns, RentalStatus status);
+
     // 오늘 대출 개수
     @Query("""
         SELECT COUNT(r)
