@@ -40,8 +40,16 @@ public class MemberServiceImpl implements MemberService {
         Optional<Member> result = memberRepository.findByMid(mid);
         Member member = result.orElseThrow(); // 데이터 없으면 예외 발생
 
+        // ModelMapper로 변환 후 role 수동 세팅
+        /*MemberDTO memberDTO = modelMapper.map(member, MemberDTO.class);
+        memberDTO.setRole(member.getRole().name()); // ← enum → String 변환
         // 엔티티를 DTO로 변환하여 반환
-        return modelMapper.map(member, MemberDTO.class);
+        return modelMapper.map(member, MemberDTO.class);*/
+
+        // 20260323 수정
+        MemberDTO memberDTO = modelMapper.map(member, MemberDTO.class);
+        memberDTO.setRole(member.getRole().name());
+        return memberDTO; // ← 세팅한 거 그대로 반환
     }
 
     @Override
@@ -52,7 +60,8 @@ public class MemberServiceImpl implements MemberService {
         Member member = result.orElseThrow();
 
         // 엔티티의 change 메서드를 사용하여 데이터 수정 (Dirty Checking)
-        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion());
+//        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion());
+        member.change(memberDTO.getMname(), memberDTO.getEmail(), memberDTO.getRegion(), memberDTO.getMpw());
 
         memberRepository.save(member);
     }
@@ -94,4 +103,47 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.existsByEmail(email);
     }
 
+
+    // 20260320 아이디/비밀번호 찾기 추가
+    @Override
+    public String findId(String mname, String email) {
+        log.info("서비스로 넘어온 값: " + mname + ", " + email); // 여기서 로그를 찍어보세요!
+        return memberRepository.findByMnameAndEmail(mname, email)
+                .map(Member::getMid)
+                .orElse(null);
+    }
+
+    @Override
+    public boolean checkMemberForPw(String mid, String email) {
+        return memberRepository.findByMidAndEmail(mid, email).isPresent();
+    }
+
+    @Override
+    public void updatePassword(String mid, String newPw) {
+        Member member = memberRepository.findByMid(mid)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 암호화 없이 바로 저장 (나중에 암호화 로직으로 교체 예정)
+        member.change(member.getMname(), member.getEmail(), member.getRegion(), newPw);
+    }
+
+
 }
+
+/*
+ * ========== MemberServiceImpl 설명 ==========
+ * - 역할: MemberService 인터페이스의 구현체. 회원 CRUD + 인증 관련 비즈니스 로직
+ * - 쓰이는 곳: MemberController에서 주입받아 사용
+ * - @Transactional: 모든 메서드에 트랜잭션 적용 (데이터 일관성 보장)
+ *
+ * [메서드]
+ * - register(): DTO → Entity 변환 후 DB 저장, 생성된 id 반환
+ * - readOne(): mid로 회원 조회 → Entity → DTO 변환 후 반환
+ * - modify(): mid로 회원 찾은 후 change() 메서드로 정보 수정 (Dirty Checking)
+ * - remove(): mid로 회원 찾은 후 deleteById()로 삭제
+ * - checkId(): existsByMid()로 아이디 존재 여부 반환
+ * - checkEmail(): existsByEmail()로 이메일 존재 여부 반환
+ * - findId(): 이름+이메일로 회원 조회 → mid 반환 (없으면 null)
+ * - checkMemberForPw(): 아이디+이메일 일치 여부 확인
+ * - updatePassword(): 회원 찾은 후 change()로 비밀번호 변경 (현재 암호화 없음)
+ */

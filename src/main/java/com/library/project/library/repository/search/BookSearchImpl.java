@@ -3,6 +3,7 @@ package com.library.project.library.repository.search;
 import com.library.project.library.entity.Book;
 import com.library.project.library.entity.QBook;
 import com.library.project.library.entity.QRecommend;
+import com.library.project.library.entity.QRental;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -20,12 +21,12 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
     }
 
     // Book 데이터가 하나라도 있는지 확인 (앱 시작 시 API 중복 호출 방지용)
-    @Override
+    /*@Override
     public boolean existsByBooks() {
         QBook book = QBook.book;
         JPQLQuery<Book> query = from(book);
         return query.fetchCount() > 0;
-    }
+    }*/
 
     // isbn 기준으로 중복 제거된 책 목록 조회 (검색 + 페이징 포함)
     //
@@ -38,17 +39,19 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
     public Page<Book> searchDistinctAll(String keyword, String keywordNor, String keywordCho, String sort, Pageable pageable) {
         QBook book = QBook.book;
         QRecommend recommend = QRecommend.recommend;
-        // QRentalHistory rental = QRentalHistory.rentalHistory;
+        QRental rental = QRental.rental;
         JPQLQuery<Book> query = from(book);
 
         // isbn별 가장 먼저 저장된 row의 id(min)를 서브쿼리로 추출
         // → 같은 isbn 중 대표 row 하나씩만 메인 쿼리에서 조회
+        //JPAExpressions는 서브 쿼리 만들때 씀
         JPQLQuery<Long> minIdPerIsbn = JPAExpressions
                 .select(book.id.min())
                 .from(book)
                 .groupBy(book.isbn);
         query.where(book.id.in(minIdPerIsbn));
 
+        //쿼리로 키워드로 검색
         if (keyword != null && !keyword.isBlank()) {
             query.where(book.bookTitle.contains(keyword)
                     .or(book.bookTitleNormal.contains(keywordNor))
@@ -61,6 +64,7 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
         // 정렬 적용 전 total 계산 (join 전)
         long total = query.fetchCount();
 
+        //검색한 데이터에서 우선순위 정해서 정렬을 함
         NumberExpression<Integer> priority = keyword != null && !keyword.isBlank() ?
                 new CaseBuilder()
                     .when(book.bookTitle.contains(keyword)).then(1)
@@ -71,7 +75,7 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
                     .when(book.description.contains(keyword)).then(6)
                     .otherwise(7) : null;
 
-        // 키워드 없으면 sort 파라미터 기준 정렬
+        // 정렬 기준이 있으면 1순위로 정렬 하고 나서 2순위로 우선수 정렬 함
         switch (sort != null ? sort : "id") {
             case "recommend":
                 // ===============================
@@ -85,10 +89,10 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
             case "rental":
                 // ===============================
                 // 렌탈 수 기준 내림차순 정렬
-                /*query.leftJoin(rental).on(rental.book.id.eq(book.id))
+                query.leftJoin(rental).on(rental.book.id.eq(book.id))
                         .groupBy(book.id)
                         .orderBy(rental.count().desc());
-                if(priority != null)    query.orderBy(priority.asc());*/
+                if(priority != null)    query.orderBy(priority.asc());
                 // ===============================
                 break;
             case "pubdate":
@@ -115,3 +119,16 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
         return new PageImpl<>(list, pageable, total);
     }
 }
+
+/*
+ * ========== BookSearchImpl 설명 ==========
+ * - 역할: BookSearch 인터페이스의 QueryDSL 구현체
+ * - 쓰이는 곳: BookRepository를 통해 BookServiceImpl.list()에서 간접 호출
+ *
+ * [searchDistinctAll() 동작 흐름]
+ * 1. isbn별 MIN(id) 서브쿼리로 대표 row만 필터링 (같은 책 여러 권 중 하나만 표시)
+ * 2. 키워드 검색: 제목(원본/정규화/초성) + 저자 + 출판사 + 설명에서 검색
+ * 3. 검색 결과 우선순위: 제목 일치(1) > 정규화(2) > 초성(3) > 저자(4) > 출판사(5) > 설명(6)
+ * 4. 정렬: recommend(추천수) / rental(대출수) / pubdate(출판일) / bookTitle(제목) / regDate(등록일)
+ * 5. 페이징 적용 후 PageImpl로 반환
+ */
