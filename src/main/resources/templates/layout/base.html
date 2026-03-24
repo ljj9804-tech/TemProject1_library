@@ -129,33 +129,39 @@
             <span class="spanTap" data-index="2">열린공간</span>
         </li>
         <li class="header-nav-item">
-            <span class="spanTap" data-index="3">도서관안내</span>
+            <span class="spanTap" data-index="3">커뮤니티</span>
         </li>
-        <div class="header-nav-content d-flex">
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="0">
+        <li class="header-nav-item">
+            <span class="spanTap" data-index="4">도서관안내</span>
+        </li>
+        <div class="header-nav-content d-flex justify-content-center">
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="0">
                 <li><a href="/book/booklist">소장자료</a></li>
                 <li><a href="/book/booklist?sort=regDate">새로들어온책</a></li>
                 <li><a href="/book/booklist?sort=rental">대출이많은책</a></li>
                 <li><a href="/book/booklist?sort=recommend">추천하는책</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="1">
-                <li><a href="#">행사·강좌</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="1">
                 <li><a href="/apply/wishBook">비치희망도서</a></li>
                 <li><a href="/apply/spaceReservation">시설예약</a></li>
                 <li><a href="/info/donation">기증·납본</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="2">
-                <li><a href="#">이달의행사</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="2">
+                <li><a href="/event/list">이달의행사</a></li>
+                <li><a href="/event/lecture">세미나·강좌</a></li>
+                <li><a href="/event/cinema">주말극장</a></li>
+            </ul>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="3">
                 <li><a href="/notice/list">공지사항</a></li>
                 <li><a href="/inquiry/list">문의사항</a></li>
             </ul>
-            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-3" data-index="3">
-                <li><a href="/info/basic">인사말</a></li>
-                <li><a href="/info/basic">연혁</a></li>
+            <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="4">
+                <li><a href="/info/greeting">인사말</a></li>
+                <li><a href="/info/history">연혁</a></li>
                 <li><a href="/info/organization">조직·업무</a></li>
                 <li><a href="/info/basic">자료현황</a></li>
                 <li><a href="/info/facilities">시설현황</a></li>
-                <li><a href="/info/facilities">이용안내</a></li>
+                <li><a href="/info/guide">이용안내</a></li>
                 <li><a href="/info/map">찾아오시는길</a></li>
             </ul>
         </div>
@@ -197,7 +203,7 @@
         <th:block th:if="${session.loginInfo != null}">
         <span class="member-name">
             <span th:text="${session.loginInfo.mname}">홍길동</span>님
-            <span class="badge-status">정상</span>
+<!--            <span class="badge-status">정상</span>-->
         </span>
             <span class="divider">|</span>
             <a th:href="@{/member/logout}">로그아웃</a>
@@ -226,7 +232,6 @@
         <li class="sidebar-item">
             <span class="sidebar-tap">신청·예약</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">행사·강좌</a></li>
                 <li><a href="/apply/wishBook">비치희망도서</a></li>
                 <li><a href="/apply/spaceReservation">시설예약</a></li>
                 <li><a href="/info/donation">기증·납본</a></li>
@@ -235,7 +240,14 @@
         <li class="sidebar-item">
             <span class="sidebar-tap">열린공간</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="#">이달의행사</a></li>
+                <li><a href="/event/list">이달의행사</a></li>
+                <li><a href="/event/lecture">세미나·강좌</a></li>
+                <li><a href="/event/cinema">주말극장</a></li>
+            </ul>
+        </li>
+        <li class="sidebar-item">
+            <span class="sidebar-tap">커뮤니티</span>
+            <ul class="sidebar-sub list-unstyled">
                 <li><a href="/notice/list">공지사항</a></li>
                 <li><a href="/inquiry/list">문의사항</a></li>
             </ul>
@@ -243,12 +255,12 @@
         <li class="sidebar-item">
             <span class="sidebar-tap">도서관안내</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="/info/basic">인사말</a></li>
-                <li><a href="/info/basic">연혁</a></li>
+                <li><a href="/info/greeting">인사말</a></li>
+                <li><a href="/info/history">연혁</a></li>
                 <li><a href="/info/organization">조직·업무</a></li>
                 <li><a href="/info/basic">자료현황</a></li>
                 <li><a href="/info/facilities">시설현황</a></li>
-                <li><a href="/info/facilities">이용안내</a></li>
+                <li><a href="/info/guide">이용안내</a></li>
                 <li><a href="/info/map">찾아오시는길</a></li>
             </ul>
         </li>
@@ -264,11 +276,17 @@
         <span th:case="'/apply/wishBook'">비치희망도서</span>
         <span th:case="'/apply/spaceReservation'">시설예약</span>
         <span th:case="'/info/donation'">기증·납본</span>
+        <span th:case="'/event/list'">이달의행사</span>
+        <span th:case="'/event/lecture'">세미나·강좌</span>
+        <span th:case="'/event/cinema'">주말극장</span>
         <span th:case="'/notice/list'">공지사항</span>
         <span th:case="'/inquiry/list'">문의사항</span>
-        <span th:case="'/info/basic'">인사말</span>
+        <span th:case="'/info/greeting'">인사말</span>
+        <span th:case="'/info/history'">연혁</span>
         <span th:case="'/info/organization'">조직·업무</span>
+        <span th:case="'/info/basic'">자료현황</span>
         <span th:case="'/info/facilities'">시설현황</span>
+        <span th:case="'/info/guide'">이용안내</span>
         <span th:case="'/info/map'">찾아오시는길</span>
         <span th:case="*">-</span>
     </div>

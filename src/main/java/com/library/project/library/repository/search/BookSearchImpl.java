@@ -51,29 +51,48 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
                 .groupBy(book.isbn);
         query.where(book.id.in(minIdPerIsbn));
 
-        //쿼리로 키워드로 검색
+        // ── 키워드 검색 조건 ──────────────────────────────────────────
+        // 제목(원본/정규화) + 저자 + 출판사 + 설명에서 검색
+        // 초성 검색(bookTitleChosung)은 keywordCho가 null이 아닐 때만 적용
+        // → BookServiceImpl에서 키워드가 순수 초성(ㄱ~ㅎ)일 때만 keywordCho를 전달
+        //   "데미안" 같은 일반 단어는 초성 변환 시 "ㄷㅁㅇ"이 되어
+        //   "동물의 세계"(초성 "ㄷㅁㅇㅅㄱ")까지 잘못 매칭되는 문제 방지
         if (keyword != null && !keyword.isBlank()) {
-            query.where(book.bookTitle.contains(keyword)
+            var condition = book.bookTitle.contains(keyword)
                     .or(book.bookTitleNormal.contains(keywordNor))
-                    .or(book.bookTitleChosung.contains(keywordCho))
                     .or(book.author.contains(keyword))
                     .or(book.publisher.contains(keyword))
-                    .or(book.description.contains(keyword)));
-
+                    .or(book.description.contains(keyword));
+            // 초성 검색은 키워드가 순수 초성일 때만 적용
+            if (keywordCho != null) {
+                condition = condition.or(book.bookTitleChosung.contains(keywordCho));
+            }
+            query.where(condition);
         }
         // 정렬 적용 전 total 계산 (join 전)
         long total = query.fetchCount();
 
-        //검색한 데이터에서 우선순위 정해서 정렬을 함
-        NumberExpression<Integer> priority = keyword != null && !keyword.isBlank() ?
-                new CaseBuilder()
+        // ── 검색 결과 우선순위 정렬 ──────────────────────────────────
+        // 제목 직접 일치(1) > 정규화 일치(2) > 초성 일치(3, 초성 검색 시만)
+        // > 저자(4) > 출판사(5) > 설명(6) > 그 외(7)
+        // 초성 우선순위(3)는 keywordCho가 null이 아닐 때만 CASE 절에 포함
+        NumberExpression<Integer> priority;
+        if (keyword != null && !keyword.isBlank()) {
+            var cb = new CaseBuilder()
                     .when(book.bookTitle.contains(keyword)).then(1)
-                    .when(book.bookTitleNormal.contains(keywordNor)).then(2)
-                    .when(book.bookTitleChosung.contains(keywordCho)).then(3)
+                    .when(book.bookTitleNormal.contains(keywordNor)).then(2);
+            // 초성 우선순위는 초성 검색이 활성화됐을 때만 적용
+            if (keywordCho != null) {
+                cb = cb.when(book.bookTitleChosung.contains(keywordCho)).then(3);
+            }
+            priority = cb
                     .when(book.author.contains(keyword)).then(4)
                     .when(book.publisher.contains(keyword)).then(5)
                     .when(book.description.contains(keyword)).then(6)
-                    .otherwise(7) : null;
+                    .otherwise(7);
+        } else {
+            priority = null;
+        }
 
         // 정렬 기준이 있으면 1순위로 정렬 하고 나서 2순위로 우선수 정렬 함
         switch (sort != null ? sort : "id") {
@@ -127,8 +146,9 @@ public class BookSearchImpl extends QuerydslRepositorySupport implements BookSea
  *
  * [searchDistinctAll() 동작 흐름]
  * 1. isbn별 MIN(id) 서브쿼리로 대표 row만 필터링 (같은 책 여러 권 중 하나만 표시)
- * 2. 키워드 검색: 제목(원본/정규화/초성) + 저자 + 출판사 + 설명에서 검색
- * 3. 검색 결과 우선순위: 제목 일치(1) > 정규화(2) > 초성(3) > 저자(4) > 출판사(5) > 설명(6)
+ * 2. 키워드 검색: 제목(원본/정규화) + 저자 + 출판사 + 설명에서 검색
+ *    초성 검색은 keywordCho가 null이 아닐 때만 적용 (순수 초성 키워드일 때만)
+ * 3. 검색 결과 우선순위: 제목 일치(1) > 정규화(2) > 초성(3, 선택적) > 저자(4) > 출판사(5) > 설명(6)
  * 4. 정렬: recommend(추천수) / rental(대출수) / pubdate(출판일) / bookTitle(제목) / regDate(등록일)
  * 5. 페이징 적용 후 PageImpl로 반환
  */

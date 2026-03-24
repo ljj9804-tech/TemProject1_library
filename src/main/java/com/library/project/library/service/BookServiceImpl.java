@@ -47,9 +47,12 @@ public class BookServiceImpl implements BookService {
 
         // 한글 검색 지원을 위해 검색어를 두 가지 형태로 변환
         // keywordNor: 자모 분리 정규화 (예: "스프링" → "ㅅㅡㅍㄹㅣㅇ")
-        // keywordCho: 초성만 추출       (예: "스프링" → "ㅅㅍㄹ")
+        // keywordCho: 초성만 추출       (예: "ㅅㅍㄹ" → "ㅅㅍㄹ")
+        //             단, 키워드가 순수 초성(ㄱ~ㅎ)일 때만 사용 (일반 단어면 null)
         String keywordNor = koreanDecomposer.toNormal(pageRequestDTO.getKeyword());
-        String keywordCho = koreanDecomposer.toChosung(pageRequestDTO.getKeyword());
+        String keywordCho = isChosungOnly(keyword)
+                ? koreanDecomposer.toChosung(keyword)
+                : null;
 
         // Pageable: 페이지 번호, 페이지 크기, 기본 정렬 기준을 담은 객체
         // "id" 기준 내림차순 = 최신 등록순 (정렬 드롭다운 기본값과는 별개로 페이징 처리에 사용)
@@ -162,6 +165,17 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public void unrecommend(Long bookId, Long memberId) {
         recommendRepository.deleteByBook_IdAndMember_Id(bookId, memberId);
+    }
+
+    // 키워드가 순수 초성(ㄱ~ㅎ)으로만 이루어져 있는지 확인
+    // 예: "ㄷㅁㅇ" → true, "데미안" → false, "ㄷ미안" → false
+    private boolean isChosungOnly(String text) {
+        if (text == null || text.isBlank()) return false;
+        for (char c : text.toCharArray()) {
+            if (c >= 'ㄱ' && c <= 'ㅎ') continue;
+            return false;
+        }
+        return true;
     }
 
 
@@ -297,15 +311,17 @@ public class BookServiceImpl implements BookService {
  * - RecommendRepository: 추천 기록 DB 접근
  * - ModelMapper: Entity ↔ DTO 변환
  * - KoreanDecomposer: 한글 검색어 정규화/초성 변환
+ * - RentalRepository: 대여 기록 DB 접근 (대여중 여부 확인)
  *
  * [메서드]
  * - list(): 도서 목록 페이징 조회. 핵심 로직:
- *   1) 검색어 정규화/초성 변환
+ *   1) 검색어 정규화/초성 변환 (초성 검색은 키워드가 순수 초성일 때만 적용)
  *   2) QueryDSL로 isbn 중복 제거 + 검색 + 정렬 + 페이징
  *   3) isbn/bookId 배치 조회로 쿼리 최적화 (N+1 방지)
- *   4) Book → BookDTO 변환 (status, recommended 세팅)
+ *   4) Book → BookDTO 변환 (status, recommended, requestPending, rentedByMe 세팅)
  *
- * - getBook(): 단건 조회. isbn 기준 대여 가능 여부 + 추천 여부 포함
+ * - getBook(): 단건 조회. isbn 기준 대여 가능 여부 + 추천 여부 + 대여중 여부 포함
  * - recommend(): Recommend 테이블에 row 추가
  * - unrecommend(): Recommend 테이블에서 해당 bookId row 전부 삭제 (@Transactional 필수)
+ * - isChosungOnly(): 키워드가 순수 초성(ㄱ~ㅎ)인지 판별 → 초성 검색 활성화 여부 결정
  */
