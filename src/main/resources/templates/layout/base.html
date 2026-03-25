@@ -97,7 +97,7 @@
         }
 
         /* 헤더 높이(70px) 기준으로 로고랑 동일하게 맞춤 */
-        @media (max-width: 1024px) {
+        @media (max-width: 1199px) {
             .header-util-menu {
                 display: none;
             }
@@ -159,7 +159,7 @@
                 <li><a href="/inquiry/list">문의사항</a></li>
             </ul>
             <ul class="header-inner list-unstyled d-flex flex-column gap-4 col-2" data-index="4">
-                <li><a href="/info/greeting">인사말</a></li>
+                <li><a href="/info">인사말</a></li>
                 <li><a href="/info/history">연혁</a></li>
                 <li><a href="/info/organization">조직·업무</a></li>
                 <li><a href="/info/basic">자료현황</a></li>
@@ -273,7 +273,7 @@
         <li class="sidebar-item">
             <span class="sidebar-tap">도서관안내</span>
             <ul class="sidebar-sub list-unstyled">
-                <li><a href="/info/greeting">인사말</a></li>
+                <li><a href="/info">인사말</a></li>
                 <li><a href="/info/history">연혁</a></li>
                 <li><a href="/info/organization">조직·업무</a></li>
                 <li><a href="/info/basic">자료현황</a></li>
@@ -353,7 +353,7 @@
         <span th:if="${currentURI.startsWith('/event/cinema')}" th:text="'주말극장'"></span>
         <span th:if="${currentURI.startsWith('/notice/')}" th:text="'공지사항'"></span>
         <span th:if="${currentURI.startsWith('/inquiry/')}" th:text="'문의사항'"></span>
-        <span th:if="${currentURI.startsWith('/info/greeting')}" th:text="'인사말'"></span>
+        <span th:if="${currentURI =='/info' or currentURI == '/info/'}" th:text="'인사말'"></span>
         <span th:if="${currentURI.startsWith('/info/history')}" th:text="'연혁'"></span>
         <span th:if="${currentURI.startsWith('/info/organization')}" th:text="'조직·업무'"></span>
         <span th:if="${currentURI.startsWith('/info/basic')}" th:text="'자료현황'"></span>
