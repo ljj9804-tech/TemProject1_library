@@ -23,7 +23,7 @@ public class InfoController {
     public String mainHome(Model model) {
         log.info("도서관 메인 홈페이지 접속...");
         model.addAttribute("info", infoService.getStaticLibraryInfo());
-        return "info/index";
+        return "redirect:/";
     }
 
     // 2. [GET] 자료현황 표 (접속 주소: /info/basic)
