@@ -1,11 +1,9 @@
 package com.library.project.library.controller;
 
 
-import com.library.project.library.dto.InquiryDTO;
-import com.library.project.library.dto.InquiryListReplyCountDTO;
-import com.library.project.library.dto.PageRequestDTO;
-import com.library.project.library.dto.PageResponseDTO;
+import com.library.project.library.dto.*;
 import com.library.project.library.service.InquiryService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -81,8 +79,6 @@ public class InquiryController {
     public String myList(PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         log.info(">>>> 내 문의 내역 페이지 접속 중...");
 
-        // 로그인 여부와 관계없이 에러가 나지 않도록 작성자 아이디를 강제 지정
-        // 로그인이 되어 있으면 실제 아이디, 안 되어 있으면 'user1' (테스트용)
         String writer = "user1";
         if(principal != null) {
             writer = principal.getName();
@@ -90,12 +86,26 @@ public class InquiryController {
 
         log.info(">>>> 현재 필터링할 작성자 아이디: " + writer);
 
+        // 📍 수정: listMyInquiry -> getMyInquiryList 로 변경
+        // 📍 서비스 정의에 따라 (writer, pageRequestDTO) 순서로 전달
         PageResponseDTO<InquiryListReplyCountDTO> responseDTO =
-                inquiryService.listMyInquiry(pageRequestDTO, writer);
+                inquiryService.getMyInquiryList(writer, pageRequestDTO);
 
         model.addAttribute("responseDTO", responseDTO);
         model.addAttribute("writer", writer);
 
         return "inquiry/myList";
+    }
+
+    //로그인 회원 전용
+    @GetMapping("/inquiry/register")
+    public String registerInquiry(HttpSession session, Model model) {
+        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
+
+        // 로그인한 유저의 mid를 뷰로 전달
+        model.addAttribute("mid", loginInfo.getMid());
+        model.addAttribute("pageTitle", "문의사항 작성");
+
+        return "inquiry/register";
     }
 }

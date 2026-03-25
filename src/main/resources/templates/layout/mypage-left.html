@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<!--<head>
+    <link rel="stylesheet" th:href="@{/css/mypage-style.css}">
+</head>-->
 <body>
 <div th:fragment="mypageLeft(mid, activeMenu)">
     <style>
+        :root {
+            /* 메인 컬러 — 부산도서관 기본 톤 */
+            --color-primary: #0d6efd;
+        }
         /* ── mypage-left 사이드 메뉴 (부산도서관 스타일) ── */
         .mypage-nav {
             background: var(--color-bg-white);
@@ -13,6 +20,8 @@
             width: 100%;
             max-width: 220px;
         }
+
+
 
         .mypage-nav__title {
             font-family: var(--font-serif);
@@ -128,19 +137,19 @@
             문의내역 <span class="mypage-nav__dash">—</span>
         </a>
 
-        <a th:href="@{/member/wishList}"
+        <a th:href="@{/member/applyMyWishBook}"
            th:classappend="${activeMenu == 'wish'} ? ' active' : ''"
            class="mypage-nav__item">
             희망도서 <span class="mypage-nav__dash">—</span>
         </a>
 
-        <a th:href="@{/apply/myFacilityList}"
+        <a th:href="@{/member/myFacilityList}"
            th:classappend="${activeMenu == 'facility'} ? ' active' : ''"
            class="mypage-nav__item">
             시설예약 <span class="mypage-nav__dash">—</span>
         </a>
 
-        <a th:href="@{/mypage/apply-list}"
+        <a th:href="@{/member/apply-list}"
            th:classappend="${activeMenu == 'event'} ? ' active' : ''"
            class="mypage-nav__item">
             행사강좌 <span class="mypage-nav__dash">—</span>

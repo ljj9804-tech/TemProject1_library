@@ -32,3 +32,4 @@ public interface BookRequestRepository extends JpaRepository<BookRequest, Long> 
     void deleteByMemberIdAndIsbnAndStatus(@Param("memberId") Long memberId, @Param("isbn") String isbn, @Param("status") RequestStatus status);
 
 }
+

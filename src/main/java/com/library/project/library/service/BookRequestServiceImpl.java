@@ -6,6 +6,7 @@ import com.library.project.library.dto.rentalDto.RentalRequestDTO;
 import com.library.project.library.entity.Book;
 import com.library.project.library.entity.BookRequest;
 import com.library.project.library.entity.Member;
+import com.library.project.library.enums.BookStatus;
 import com.library.project.library.enums.RequestStatus;
 import com.library.project.library.repository.BookRepository;
 import com.library.project.library.repository.BookRequestRepository;
@@ -38,7 +39,7 @@ public class BookRequestServiceImpl implements BookRequestService {
                 .orElseThrow(() -> new RuntimeException("도서 없음"));
 
         // 이미 PENDING 신청이 있으면 중복 신청 방지
-        if (bookRequestRepository.existsByBook_IdAndStatus(dto.getBookId(), RequestStatus.PENDING)) {
+        if (bookRequestRepository.existsByMember_IdAndBook_IdAndStatus(member.getId(), dto.getBookId(), RequestStatus.PENDING)) {
             throw new RuntimeException("이미 신청 중인 도서입니다.");
         }
 
@@ -72,13 +73,19 @@ public class BookRequestServiceImpl implements BookRequestService {
             throw new RuntimeException("이미 처리된 신청입니다.");
         }
 
+        // 예약된 책의 ISBN으로 AVAILABLE인 권을 찾아서 대출 처리
+        // → 예약 시 고정된 book_id가 아닌, 승인 시점에 비어있는 권을 배정
+        String isbn = request.getBook().getIsbn();
+        Book availableBook = bookRepository.findFirstByIsbnAndStatus(isbn, BookStatus.AVAILABLE)
+                .orElseThrow(() -> new RuntimeException("대여 가능한 책이 없습니다."));
+
         // 상태 변경
         request.setStatus(RequestStatus.APPROVED);
 
-        // 실제 대출 처리 (기존 RentalService 활용)
+        // 실제 대출 처리 (AVAILABLE인 권의 id로 대출)
         RentalRequestDTO rentalDTO = RentalRequestDTO.builder()
                 .memberId(request.getMember().getId())
-                .bookId(request.getBook().getId())
+                .bookId(availableBook.getId())
                 .build();
         rentalService.rentBook(rentalDTO);
     }

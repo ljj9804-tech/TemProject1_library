@@ -49,11 +49,13 @@ public class InquirySearchImpl extends QuerydslRepositorySupport implements Inqu
         return performSearch(types, keyword, pageable, null);
     }
 
+
     // 💡 새로 추가된 메서드: 내 글 목록용 (writer 아이디를 보냄)
     @Override
     public Page<InquiryListReplyCountDTO> searchMyList(Pageable pageable, String writer) {
         return performSearch(null, null, pageable, writer);
     }
+
 
     // 💡 중복을 제거한 공통 검색 로직
     private Page<InquiryListReplyCountDTO> performSearch(String[] types, String keyword, Pageable pageable, String writer) {

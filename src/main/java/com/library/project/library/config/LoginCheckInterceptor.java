@@ -18,22 +18,38 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
+        // 2. 세션 가져오기
         HttpSession session = request.getSession(false); // ✅ false: 새 세션 생성 안 함
 
         log.info("세션 ID: " + (session != null ? session.getId() : "없음"));
         log.info("세션 만료시간(초): " + (session != null ? session.getMaxInactiveInterval() : "없음"));
         log.info("loginInfo: " + (session != null ? session.getAttribute("loginInfo") : "없음"));
 
+        // 3. 로그인 체크
         if (session == null || session.getAttribute("loginInfo") == null) {
             log.info("로그인 정보 없음! 로그인 페이지로 이동합니다.");
 
+            // 4. dest 저장
+            /***핵심 기능이에요!**
+                    예를 들어 로그인 안 한 상태에서 `/member/mypage` 접근하면:
+            dest = "/member/mypage" 저장
+                    ↓
+            로그인 페이지로 이동
+                    ↓
+            로그인 성공
+                    ↓
+            저장해둔 dest("/member/mypage") 로 자동 이동!*/
             // ✅ 원래 가려던 주소 저장 (로그인 후 돌아오기 위해)
             HttpSession newSession = request.getSession(true);
             String dest = request.getRequestURI() +
                     (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
+            // 5. 필터링 조건
             if (!dest.contains(".css") && !dest.contains(".js") && !dest.contains(".ico")
-                    && !dest.contains(".png") && !dest.contains(".jpg")) {
+                    && !dest.contains(".png") && !dest.contains(".jpg")
+                    && !dest.equals("/member/login")
+                    && !dest.equals("/member/join")
+                    && !dest.equals("/")) {
                 newSession.setAttribute("dest", dest);
             }
 

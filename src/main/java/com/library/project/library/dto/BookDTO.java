@@ -29,7 +29,7 @@ public class BookDTO {
     private BookStatus status;
     private Boolean recommended;
     private Boolean requestPending;
-    private Boolean rentedByMe;
+    private Boolean rentedByMe;     // 현재 로그인한 회원이 이 isbn의 책을 대여중인지 여부 → 대여중이면 예약 버튼 비활성화
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime regDate;
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -46,5 +46,7 @@ public class BookDTO {
  * - bookTitleNormal / bookTitleChosung: 한글 검색을 위한 정규화/초성 제목
  * - status: 대여 가능 여부 (AVAILABLE / RENTED) - isbn 전체 기준으로 판단
  * - recommended: 추천 여부 (true/false) - 프론트에서 추천 버튼 초기 상태 결정에 사용
+ * - requestPending: 예약 대기 여부 (true/false) - 프론트에서 예약 중 뱃지 표시에 사용
+ * - rentedByMe: 내가 대여중인지 여부 (true/false) - 대여중이면 예약 버튼 비활성화
  * - regDate / modDate: 등록일/수정일 (JSON 응답 시 yyyy-MM-dd 포맷)
  */

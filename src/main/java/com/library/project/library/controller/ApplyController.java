@@ -19,7 +19,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-@RequestMapping("/apply")
+//@RequestMapping("/apply")
 @RequiredArgsConstructor
 @Log4j2
 public class ApplyController {
@@ -27,88 +27,80 @@ public class ApplyController {
     private final ApplyService applyService;
 
     // 공간 예약 신청 페이지
-    @GetMapping("/spaceReservation")
+    @GetMapping("/apply/spaceReservation")
     public String getInfoPage(Model model) {
+        // 폼 바인딩을 위한 빈 객체 전달
         model.addAttribute("applyDTO", new ApplyDTO());
         return "apply/spaceReservation";
     }
 
-    // 신청 등록 처리
-    @PostMapping("/register")
-    public String registerPost(ApplyDTO applyDTO, RedirectAttributes redirectAttributes) {
-        log.info("신청서 데이터 전송 시도: " + applyDTO);
+    // [수정됨] 신청 등록 처리
+    @PostMapping("/apply/register")
+    public String registerPost(ApplyDTO applyDTO, HttpSession session, RedirectAttributes redirectAttributes) {
 
+        // 1. 로그인 여부 재확인 (서버 측 안전장치)
+        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
+
+        if (loginInfo == null) {
+            log.warn("비로그인 사용자의 접근 차단");
+            redirectAttributes.addFlashAttribute("message", "로그인이 필요한 서비스입니다.");
+            return "redirect:/member/login";
+        }
+
+        // 2. 현재 로그인한 사용자의 ID를 DTO에 세팅 (누가 신청했는지 식별)
+        applyDTO.setMid(loginInfo.getMid());
+
+        log.info("신청서 데이터 전송 시도 - 작성자: " + loginInfo.getMid());
+        log.info("상세 데이터: " + applyDTO);
+
+        // 3. 서비스 호출 및 등록
         Long ano = applyService.register(applyDTO);
 
+        // 4. 완료 메시지 전달
         redirectAttributes.addFlashAttribute("message",
                 "[신청번호 : " + ano + "] 신청서 접수가 완료되었습니다!\n신청 내역은 마이페이지에서 확인 가능합니다.");
 
         return "redirect:/apply/spaceReservation";
     }
 
-//    // 내 시설 예약 신청 내역 목록
-    @GetMapping("/myFacilityList")
-    public String getMyFacilityList(Model model, HttpSession session, HttpServletRequest request) {
 
-        Object loginInfo = session.getAttribute("loginInfo");
+    // [추가] 상세 내역 조회를 위한 Ajax 전용 API
+    @ResponseBody // 페이지 이동이 아니라 '데이터(JSON)'만 보내겠다는 선언입니다.
+    @GetMapping("/member/readApi") // HTML의 fetch('/apply/readApi?ano=' + ano) 와 주소를 맞춰줍니다.
+    public ApplyDTO readApi(Long ano) {
+        log.info("시설 대관 상세 조회 요청 - 번호: " + ano);
 
-        if (loginInfo == null) {
-            session.setAttribute("dest", request.getRequestURI());
-            return "redirect:/member/login";
+        // 1. 서비스에서 해당 번호(ano)의 데이터를 가져옵니다.
+        ApplyDTO applyDTO = applyService.getApply(ano);
+
+        // 2. 만약 데이터가 없으면 로그를 남깁니다.
+        if(applyDTO == null) {
+            log.error(ano + "번 신청 내역을 찾을 수 없습니다.");
         }
 
-        // loginInfo에서 ID 추출 (MemberDTO라고 가정)
-        String mid = ((MemberDTO)loginInfo).getMid();
-        log.info("내 신청 내역 조회 요청 - 회원 ID: " + mid);
-
-        // 3. 해당 사용자의 신청 리스트 조회 (서비스 호출)
-        List<ApplyDTO> applyList = applyService.getApplyListByMid(mid);
-
-        // 4. 뷰로 데이터 전달
-        model.addAttribute("applyList", applyList); // 리스트 전달
-        model.addAttribute("totalCount", applyList.size()); // 총 개수 전달
-        model.addAttribute("mid", mid); // 화면에 누구의 내역인지 표시할 경우 대비
-
-        return "member/myFacilityList";
+        // 3. 데이터를 JSON 형태로 브라우저에 던져줍니다.
+        return applyDTO;
     }
 
+    // 내 시설 예약 신청 내역 목록 (기존 코드 유지)
+    @GetMapping("member/myFacilityList")
+    public String getMyFacilityList(HttpSession session, Model model) {
 
-//     내 시설 예약 신청 내역 목록
-//    로그인 없이 화면 띄우기 목적 임시 코드
-//    @GetMapping("/myFacilityList")
-//    public String getMyFacilityList(Model model, HttpSession session) {
-//
-//        // [임시 코드] 로그인이 자꾸 풀린다면, 테스트를 위해 강제로 세션을 넣어줍니다.
-//        if (session.getAttribute("loginInfo") == null) {
-//            log.info("테스트를 위해 임시 세션을 생성합니다.");
-//            MemberDTO testMember = MemberDTO.builder()
-//                    .mid("test_user") // 실제 DB에 있는 아이디
-//                    .mname("테스트유저")
-//                    .build();
-//            session.setAttribute("loginInfo", testMember);
-//        }
-//
-//        // 이제 인터셉터가 와도 "loginInfo가 있네?" 하고 통과시켜줍니다.
-//        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
-//        String mid = loginInfo.getMid();
-//
-//        List<ApplyDTO> applyList = applyService.getApplyListByMid(mid);
-//        model.addAttribute("applyList", applyList);
-//        model.addAttribute("totalCount", applyList.size());
-//
-//        return "member/myFacilityList";
-//    }
-//
-//    // JSON 데이터를 반환하는 상세 조회 API (Ajax용)
-//    @GetMapping("/readApi")
-//    @ResponseBody // 💡 페이지가 아닌 데이터를 리턴하게 합니다.
-//    public ApplyDTO readApi(Long ano) {
-//        log.info("Ajax 상세 조회 번호: " + ano);
-//
-//        // 서비스 호출 (기존에 만들어둔 getApply 메서드 활용)
-//        return applyService.getApply(ano);
-//    }
+        // 1. 세션에서 로그인 정보 꺼내기 (인터셉터가 체크해주므로 바로 꺼내면 됨)
+        MemberDTO loginInfo = (MemberDTO) session.getAttribute("loginInfo");
+        String mid = loginInfo.getMid();
 
+        // 2. 본인 로직 작성 (진주님 작업: 해당 mid로 신청 내역 조회)
+        List<ApplyDTO> applyList = applyService.getApplyListByMid(mid);
+        model.addAttribute("applyList", applyList);
+        model.addAttribute("totalCount", applyList.size());
+
+        // 3. 가이드 필수 항목 (화면 레이아웃용)
+        model.addAttribute("mid", mid); // 사이드 메뉴 등에 내 아이디 표시용
+        model.addAttribute("pageTitle", "시설 예약 내역"); // 상단 빨간 배너 타이틀용
+
+        return "member/myFacilityList"; // 가이드에서 지정한 경로
+    }
 }
 
 /*

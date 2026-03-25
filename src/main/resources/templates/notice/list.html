@@ -19,7 +19,10 @@
                     <p class="text-muted small mb-0">
                         총 <span class="text-primary fw-bold" th:text="${responseDTO != null ? responseDTO.total : 0}">0</span>건의 게시물이 있습니다.
                     </p>
-                    <a th:href="@{/notice/register}" class="btn btn-primary px-4">글쓰기</a>
+
+                    <div th:if="${session.loginInfo != null && session.loginInfo.role == 'ADMIN'}">
+                        <a th:href="@{/notice/register}" class="btn btn-primary px-4">공지사항 등록</a>
+                    </div>
                 </div>
 
                 <table class="table table-hover border-top align-middle">
@@ -32,12 +35,11 @@
                     </tr>
                     </thead>
                     <tbody th:with="link = ${pageRequestDTO != null ? pageRequestDTO.getLink() : ''}">
-                    <tr th:each="dto : ${responseDTO != null ? responseDTO.dtoList : null}">
+                    <tr th:each="dto : ${responseDTO?.dtoList}">
                         <td th:text="${dto.nno}"></td>
                         <td>
-                            <div th:if="${dto.noticeImages != null && dto.noticeImages.size() > 0}" class="d-inline-block me-2">
-                                <img th:each="noticeImage: ${dto.noticeImages}"
-                                     th:src="|/display/s_${noticeImage.uuid}_${noticeImage.fileName}|"
+                            <div th:if="${dto.noticeImages != null && !#lists.isEmpty(dto.noticeImages)}" class="d-inline-block me-2">
+                                <img th:src="|/display/s_${dto.noticeImages[0].uuid}_${dto.noticeImages[0].fileName}|"
                                      class="rounded shadow-sm"
                                      style="width: 45px; height: 45px; object-fit: cover;"
                                      alt="썸네일">
@@ -60,22 +62,47 @@
                     </tr>
                     </tbody>
                 </table>
+
+                <div class="d-flex justify-content-center mt-4">
+                    <ul class="pagination shadow-sm" th:if="${responseDTO != null}">
+                        <li class="page-item" th:if="${responseDTO.prev}">
+                            <a class="page-link text-dark" th:data-num="${responseDTO.start - 1}">이전</a>
+                        </li>
+
+                        <th:block th:each="i : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                            <li th:class="${responseDTO.page == i} ? 'page-item active' : 'page-item'">
+                                <a class="page-link" th:data-num="${i}" th:text="${i}"></a>
+                            </li>
+                        </th:block>
+
+                        <li class="page-item" th:if="${responseDTO.next}">
+                            <a class="page-link text-dark" th:data-num="${responseDTO.end + 1}">다음</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script layout:fragment="script" th:inline="javascript">
-    const result = /*[[${result}]]*/ null;
 
+<script layout:fragment="script" th:inline="javascript">
+    // 페이지네이션 클릭 이벤트
+    document.querySelector(".pagination")?.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = e.target;
+        if (target.tagName !== 'A') return;
+
+        const num = target.getAttribute("data-num");
+        self.location = `/notice/list?page=${num}`;
+    }, false);
+
+    // 알림창 로직
+    const result = [[${result}]];
     if (result) {
-        if(result === 'modified') {
-            alert("수정되었습니다.");
-        } else if(result === 'removed') {
-            alert("삭제되었습니다.");
-        } else {
-            alert(result + "번 공지사항이 등록되었습니다.");
-        }
+        if(result === 'modified') alert("수정되었습니다.");
+        else if(result === 'removed') alert("삭제되었습니다.");
+        else alert(result + "번 공지사항이 등록되었습니다.");
     }
 </script>
 </html>

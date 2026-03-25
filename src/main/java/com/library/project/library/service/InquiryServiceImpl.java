@@ -1,6 +1,5 @@
 package com.library.project.library.service;
 
-
 import com.library.project.library.domain.Inquiry;
 import com.library.project.library.dto.InquiryDTO;
 import com.library.project.library.dto.InquiryListReplyCountDTO;
@@ -47,7 +46,7 @@ public class InquiryServiceImpl implements InquiryService {
         Optional<Inquiry> result = inquiryRepository.findById(inquiryDTO.getIno());
         Inquiry inquiry = result.orElseThrow();
 
-        // 엔티티의 change 메서드 파라미터 확인 (제목, 내용, 비밀글여부)
+        // 엔티티의 change 메서드 (제목, 내용, 비밀글여부 수정)
         inquiry.change(
                 inquiryDTO.getTitle(),
                 inquiryDTO.getContent(),
@@ -69,7 +68,6 @@ public class InquiryServiceImpl implements InquiryService {
         String keyword = pageRequestDTO.getKeyword();
         Pageable pageable = pageRequestDTO.getPageable("ino");
 
-        // Querydsl의 searchAll 호출
         Page<Inquiry> result = inquiryRepository.searchAll(types, keyword, pageable);
 
         List<InquiryDTO> dtoList = result.getContent().stream()
@@ -83,14 +81,13 @@ public class InquiryServiceImpl implements InquiryService {
                 .build();
     }
 
-    // 2. 답변(댓글) 개수 포함 목록 조회 (Board 구조 차용)
+    // 2. 답변(댓글) 개수 포함 전체 목록 조회
     @Override
     public PageResponseDTO<InquiryListReplyCountDTO> listWithReplyCount(PageRequestDTO pageRequestDTO) {
         String[] types = pageRequestDTO.getTypes();
         String keyword = pageRequestDTO.getKeyword();
         Pageable pageable = pageRequestDTO.getPageable("ino");
 
-        // Querydsl의 searchWithReplyCount 호출
         Page<InquiryListReplyCountDTO> result = inquiryRepository.searchWithReplyCount(types, keyword, pageable);
 
         return PageResponseDTO.<InquiryListReplyCountDTO>withAll()
@@ -99,16 +96,19 @@ public class InquiryServiceImpl implements InquiryService {
                 .total((int) result.getTotalElements())
                 .build();
     }
-    @Override
-    public PageResponseDTO<InquiryListReplyCountDTO> listMyInquiry(PageRequestDTO pageRequestDTO, String writer) {
 
-        // 1. 페이징 정보 생성 (기본적으로 글 번호 'ino' 역순 정렬)
+
+    // 3. 나의 문의 내역 조회 (댓글 개수 포함 버전)
+    @Override
+    public PageResponseDTO<InquiryListReplyCountDTO> getMyInquiryList(String mid, PageRequestDTO pageRequestDTO) {
+
+        // 페이징 정보 생성 (기본적으로 글 번호 'ino' 역순 정렬)
         Pageable pageable = pageRequestDTO.getPageable("ino");
 
-        // 2. 아까 만든 레포지토리의 searchMyList 호출 (아이디 필터링)
-        Page<InquiryListReplyCountDTO> result = inquiryRepository.searchMyList(pageable, writer);
+        // Querydsl 레포지토리의 searchMyList 호출 (아이디 필터링)
+        Page<InquiryListReplyCountDTO> result = inquiryRepository.searchMyList(pageable, mid);
 
-        // 3. 결과를 PageResponseDTO 형태로 변환해서 반환
+        // 결과를 PageResponseDTO 형태로 변환해서 반환
         return PageResponseDTO.<InquiryListReplyCountDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(result.getContent())

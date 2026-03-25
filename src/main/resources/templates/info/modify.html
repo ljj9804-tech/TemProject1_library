@@ -15,21 +15,22 @@
         <a th:href="@{/info/map}" class="btn btn-outline-dark btn-sm shadow-sm">📍 찾아오시는 길</a>
     </div>
 
-    <h2 class="mb-4 fw-bold">➕ 새 자료 현황 등록</h2>
+    <h2 class="mb-4 fw-bold">📊 자료 현황 수정</h2>
     <hr>
 
     <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body p-5">
-            <p class="text-muted mb-4">* 도서관의 새로운 자료 카테고리와 수량을 입력해 주세요.</p>
+            <p class="text-muted mb-4">* 선택하신 자료의 카테고리명과 수량을 수정할 수 있습니다.</p>
 
-            <form th:action="@{/info/register}" method="post">
-                <input type="hidden" name="infoId" value="1">
+            <form th:action="@{/info/modify}" method="post">
+                <input type="hidden" name="statId" th:value="${stat.statId}">
+                <input type="hidden" name="infoId" th:value="${stat.infoId}">
 
                 <div class="mb-4 row">
                     <label for="categoryName" class="col-sm-2 col-form-label fw-bold">구분(카테고리)</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control form-control-lg" id="categoryName" name="categoryName"
-                               placeholder="예: 일반도서, 아동도서, DVD 등" required>
+                               th:value="${stat.categoryName}" required>
                     </div>
                 </div>
 
@@ -37,14 +38,14 @@
                     <label for="itemCount" class="col-sm-2 col-form-label fw-bold">장서량 (권/매)</label>
                     <div class="col-sm-10">
                         <input type="number" class="form-control form-control-lg" id="itemCount" name="itemCount"
-                               placeholder="숫자만 입력해 주세요" required min="0">
+                               th:value="${stat.itemCount}" required min="0">
                     </div>
                 </div>
 
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-center gap-3">
-                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">등록하기</button>
+                    <button type="submit" class="btn btn-success px-5 py-2 fw-bold">수정 완료</button>
                     <a th:href="@{/info/basic}" class="btn btn-outline-secondary px-5 py-2">취소</a>
                 </div>
             </form>
@@ -53,16 +54,7 @@
 </div>
 
 <script layout:fragment="script" th:inline="javascript">
-    console.log("자료 등록 페이지 로드 완료");
-
-    // 등록 전 자바스크립트 유효성 검사 (성규님의 코드 유지 및 보완)
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const itemCount = document.getElementById('itemCount').value;
-        if (itemCount < 0) {
-            alert('장서량은 0보다 작을 수 없습니다. 다시 확인해 주세요.');
-            e.preventDefault();
-        }
-    });
+    console.log("자료 수정 페이지 로드 완료");
 </script>
 </body>
 </html>
